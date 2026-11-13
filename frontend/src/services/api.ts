@@ -203,3 +203,30 @@ export const trackingService = {
   }
 };
 
+export const strategicService = {
+  getIndicatorsTree: async () => {
+    try {
+      const res = await api.get('/strategic/indicators-tree');
+      return res.data;
+    } catch (err) {
+      console.warn('Error cargando árbol de indicadores');
+      return [];
+    }
+  },
+
+  createArea: async (data: any) => {
+    const res = await api.post('/strategic/areas', data);
+    return res.data;
+  },
+
+  createObjective: async (data: any) => {
+    const res = await api.post('/strategic/objectives', data);
+    return res.data;
+  },
+
+  createIndicator: async (data: any) => {
+    const res = await api.post('/strategic/indicators', data);
+    return res.data;
+  }
+};
+

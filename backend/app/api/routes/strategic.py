@@ -18,12 +18,11 @@ def list_strategic_areas(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Lista las áreas estratégicas del municipio del usuario logueado.
+    Lista las áreas estratégicas del municipio del usuario logueado con sus objetivos e indicadores.
     """
-    areas = db.query(StrategicArea).filter(
+    return db.query(StrategicArea).filter(
         StrategicArea.tenant_id == current_user.tenant_id
-    ).order_index = StrategicArea.order_index
-    return db.query(StrategicArea).filter(StrategicArea.tenant_id == current_user.tenant_id).order_by(StrategicArea.order_index).all()
+    ).order_by(StrategicArea.order_index).all()
 
 @router.post("/areas", response_model=StrategicAreaResponse, status_code=status.HTTP_201_CREATED)
 def create_strategic_area(
@@ -49,6 +48,80 @@ def create_strategic_area(
     db.commit()
     db.refresh(new_area)
     return new_area
+
+@router.get("/indicators-tree")
+def get_strategic_indicators_tree(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retorna el árbol estratégico completo (Áreas -> Objetivos -> Indicadores)
+    con el cálculo del avance acumulado a partir de los proyectos vinculados.
+    """
+    from app.services.calculation import calculate_project_progress, get_traffic_light
+
+    areas = db.query(StrategicArea).filter(
+        StrategicArea.tenant_id == current_user.tenant_id
+    ).order_by(StrategicArea.order_index).all()
+
+    result = []
+    for area in areas:
+        area_dict = {
+            "id": area.id,
+            "code": area.code,
+            "name": area.name,
+            "weight_percentage": float(area.weight_percentage),
+            "objectives": []
+        }
+        for obj in area.objectives:
+            obj_dict = {
+                "id": obj.id,
+                "code": obj.code,
+                "description": obj.description,
+                "target_year": obj.target_year,
+                "indicators": []
+            }
+            for ind in obj.indicators:
+                linked_projects = ind.projects
+                total_target = float(ind.target_value)
+                
+                current_value = 0.0
+                for proj in linked_projects:
+                    prog = calculate_project_progress(proj.id, db)
+                    real_pct = prog.get("real_progress_pct", 0.0)
+                    current_value += (real_pct / 100.0) * total_target
+
+                current_value = round(current_value, 2)
+                progress_pct = round((current_value / total_target) * 100.0, 2) if total_target > 0 else 0.0
+                traffic_light = get_traffic_light(progress_pct / 100.0)
+
+                ind_dict = {
+                    "id": ind.id,
+                    "code": ind.code,
+                    "name": ind.name,
+                    "unit_of_measure": ind.unit_of_measure,
+                    "baseline_value": float(ind.baseline_value),
+                    "target_value": total_target,
+                    "current_value": current_value,
+                    "progress_pct": progress_pct,
+                    "traffic_light": traffic_light,
+                    "frequency": ind.frequency,
+                    "verification_source": ind.verification_source,
+                    "linked_projects": [
+                        {
+                            "id": p.id,
+                            "code": p.code,
+                            "name": p.name,
+                            "status": p.status
+                        }
+                        for p in linked_projects
+                    ]
+                }
+                obj_dict["indicators"].append(ind_dict)
+            area_dict["objectives"].append(obj_dict)
+        result.append(area_dict)
+
+    return result
 
 @router.post("/objectives", response_model=StrategicObjectiveResponse, status_code=status.HTTP_201_CREATED)
 def create_objective(

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, ShieldCheck, Activity, Smartphone, Layers, Users } from 'lucide-react';
+import { Building2, ShieldCheck, Activity, Smartphone, Layers, Users, Compass } from 'lucide-react';
 
 interface NavbarProps {
   currentTab: string;
@@ -82,6 +82,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Smartphone className="w-4 h-4 text-emerald-600" />
               <span>Reporte Campo (Móvil)</span>
             </button>
+
+            <button
+              onClick={() => setCurrentTab('strategic')}
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                currentTab === 'strategic'
+                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <Compass className="w-4 h-4 text-indigo-600" />
+              <span>Planificación & POA</span>
+            </button>
           </nav>
 
           {/* Selector de Rol Demostrativo */}
@@ -131,6 +143,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <Smartphone className="w-5 h-5 mb-0.5" />
           Campo
+        </button>
+        <button
+          onClick={() => setCurrentTab('strategic')}
+          className={`flex flex-col items-center text-xs font-semibold ${
+            currentTab === 'strategic' ? 'text-indigo-600' : 'text-slate-500'
+          }`}
+        >
+          <Compass className="w-5 h-5 mb-0.5" />
+          POA
         </button>
       </div>
     </header>

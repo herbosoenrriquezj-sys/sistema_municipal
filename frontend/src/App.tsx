@@ -3,6 +3,7 @@ import { Navbar } from './components/Navbar';
 import { ExecutiveDashboard } from './components/ExecutiveDashboard';
 import { ProjectsView } from './components/ProjectsView';
 import { FieldReportingView } from './components/FieldReportingView';
+import { StrategicView } from './components/StrategicView';
 import { dashboardService, projectService, authService } from './services/api';
 import { ExecutiveSummary, Project } from './types';
 import { Loader2, RefreshCw } from 'lucide-react';
@@ -83,6 +84,12 @@ export const App: React.FC = () => {
                 projects={projects}
                 currentRole={currentRole}
                 onRefresh={loadData}
+              />
+            )}
+
+            {currentTab === 'strategic' && (
+              <StrategicView
+                onSelectProject={handleSelectProject}
               />
             )}
           </>
