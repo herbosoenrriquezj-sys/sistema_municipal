@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Printer, Download, Building2, CheckCircle2, AlertTriangle, 
-  Clock, ShieldCheck, ArrowLeft, FileCheck, Layers
+  Clock, ShieldCheck, ArrowLeft, FileCheck, Layers, FileSpreadsheet
 } from 'lucide-react';
 import { dashboardService } from '../services/api';
 
@@ -31,6 +31,49 @@ export const OfficialReportView: React.FC<OfficialReportViewProps> = ({ onBack }
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleExportCsv = () => {
+    if (!reportData) return;
+    const headers = [
+      'Código',
+      'Proyecto / Obra',
+      'Área Estratégica',
+      'Presupuesto Oficial (Bs.)',
+      'Fecha Inicio',
+      'Fecha Fin',
+      'Versión LB',
+      'Avance Real (%)',
+      'Avance Prog. (%)',
+      'Cumplimiento',
+      'Semáforo',
+      'Causa de Desvío'
+    ];
+
+    const rows = (reportData.projects_detailed || []).map((p: any) => [
+      `"${p.code}"`,
+      `"${p.name.replace(/"/g, '""')}"`,
+      `"${p.area_name}"`,
+      p.budget,
+      p.start_date,
+      p.end_date,
+      `v${p.baseline_version}`,
+      p.real_progress_pct,
+      p.planned_progress_pct,
+      p.compliance_index,
+      p.traffic_light.toUpperCase(),
+      `"${p.variance_reason}"`
+    ]);
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map((r: any) => r.join(';'))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${reportData.report_code}_Matriz_Fisico_Financiera.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading || !reportData) {
@@ -69,6 +112,15 @@ export const OfficialReportView: React.FC<OfficialReportViewProps> = ({ onBack }
               <option value="Informe Anual de Gestión">Informe Anual de Gestión</option>
             </select>
           </div>
+
+          <button
+            onClick={handleExportCsv}
+            className="inline-flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition-all"
+            title="Descargar matriz en Excel para remisión al Concejo y Planificación"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Exportar Excel (CSV)</span>
+          </button>
 
           <button
             onClick={handlePrint}

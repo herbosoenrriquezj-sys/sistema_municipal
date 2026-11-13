@@ -3,7 +3,7 @@ import {
   FolderKanban, CheckCircle2, Lock, Calendar, DollarSign, MapPin, 
   ChevronDown, ChevronRight, Layers, FileCheck2, Sparkles, Check,
   AlertTriangle, History, Plus, X, RefreshCw, CalendarDays, TrendingUp,
-  BarChart3, AlertOctagon, HelpCircle
+  BarChart3, AlertOctagon, HelpCircle, FileSpreadsheet, FileText, ShieldCheck
 } from 'lucide-react';
 import { Project, SCurveData } from '../types';
 import { projectService } from '../services/api';
@@ -23,8 +23,8 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   const [freezing, setFreezing] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Pestañas por proyecto: 'edt' | 'gantt' | 'scurve'
-  const [activeProjectTabs, setActiveProjectTabs] = useState<{ [projectId: string]: 'edt' | 'gantt' | 'scurve' }>({});
+  // Pestañas por proyecto: 'edt' | 'gantt' | 'scurve' | 'contract'
+  const [activeProjectTabs, setActiveProjectTabs] = useState<{ [projectId: string]: 'edt' | 'gantt' | 'scurve' | 'contract' }>({});
   const [sCurveCache, setSCurveCache] = useState<{ [projectId: string]: SCurveData }>({});
   const [loadingSCurve, setLoadingSCurve] = useState<string | null>(null);
 
@@ -57,11 +57,47 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
     }
   };
 
-  const setProjectTab = (projectId: string, tab: 'edt' | 'gantt' | 'scurve') => {
+  const setProjectTab = (projectId: string, tab: 'edt' | 'gantt' | 'scurve' | 'contract') => {
     setActiveProjectTabs((prev) => ({ ...prev, [projectId]: tab }));
     if (tab === 'scurve') {
       loadSCurve(projectId);
     }
+  };
+
+  const handleExportCsv = () => {
+    const headers = [
+      'Código',
+      'Nombre de la Obra',
+      'Ubicación / Distrito',
+      'Presupuesto Oficial (Bs.)',
+      'Fuente de Financiamiento',
+      'Fecha Inicio',
+      'Fecha Fin',
+      'Línea Base Congelada',
+      'Estado'
+    ];
+
+    const rows = projects.map((p) => [
+      `"${p.code}"`,
+      `"${p.name.replace(/"/g, '""')}"`,
+      `"${p.location_name || ''}"`,
+      p.budget_allocated || 0,
+      `"${p.funding_source || ''}"`,
+      p.start_date_planned,
+      p.end_date_planned,
+      p.baseline_frozen_at ? 'SÍ' : 'NO',
+      `"${p.status}"`
+    ]);
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `SGP_Cartera_Proyectos_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleFreeze = async (projectId: string) => {
@@ -151,13 +187,24 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={() => setShowNewProjectModal(true)}
-          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs shadow-md transition-all self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Registrar Nueva Obra</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={handleExportCsv}
+            className="inline-flex items-center space-x-2 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all"
+            title="Exportar cartera completa a Excel para control presupuestario"
+          >
+            <FileSpreadsheet className="w-4 h-4" />
+            <span>Exportar Obras (CSV)</span>
+          </button>
+
+          <button
+            onClick={() => setShowNewProjectModal(true)}
+            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs shadow-md transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Registrar Nueva Obra</span>
+          </button>
+        </div>
       </div>
 
       {successMessage && (
@@ -315,6 +362,17 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                           >
                             <TrendingUp className="w-4 h-4" />
                             <span>Curva "S" (Físico vs Financiero)</span>
+                          </button>
+                          <button
+                            onClick={() => setProjectTab(proj.id, 'contract')}
+                            className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                              currentTab === 'contract'
+                                ? 'bg-sky-700 text-white shadow-xs'
+                                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                            }`}
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>Ficha Contractual & SICOES</span>
                           </button>
                         </div>
 
@@ -579,6 +637,144 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                             )}
                           </div>
                         )}
+
+                        {/* VISTA 4: FICHA CONTRACTUAL Y SICOES (MÓDULO 4.1) */}
+                        {currentTab === 'contract' && (() => {
+                          const isQuiroga = proj.code.includes('OB-01');
+                          const isLajastambo = proj.code.includes('ED-02');
+                          const isPatrimonio = proj.code.includes('CH-03');
+
+                          const contractorName = isQuiroga 
+                            ? 'Consorcio Vial Chuquisaca (Asoc. Accidental)'
+                            : isLajastambo 
+                            ? 'Constructora San Roque S.R.L.'
+                            : isPatrimonio
+                            ? 'Asociación Accidental Patrimonio Sucre'
+                            : 'Constructora El Alfarero S.R.L.';
+
+                          const cuceCode = isQuiroga 
+                            ? '26-0401-00-149201-1-1'
+                            : isLajastambo 
+                            ? '26-0401-00-150344-1-1'
+                            : isPatrimonio
+                            ? '26-0401-00-148112-1-1'
+                            : '26-0401-00-151090-1-1';
+
+                          const modalContract = isQuiroga || isLajastambo ? 'Licitación Pública Nacional (LPN)' : 'ANPE (D.S. 0181)';
+
+                          return (
+                            <div className="space-y-5 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs text-xs animate-fadeIn">
+                              {/* Cabecera SICOES */}
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                                <div>
+                                  <div className="flex items-center space-x-2">
+                                    <span className="font-mono text-xs font-black px-2.5 py-0.5 rounded bg-sky-100 text-sky-800 border border-sky-300">
+                                      CUCE: {cuceCode}
+                                    </span>
+                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                      · {modalContract}
+                                    </span>
+                                  </div>
+                                  <h4 className="font-bold text-sm sm:text-base text-slate-900 mt-1">
+                                    Contrato Administrativo de Obra N° GAMS-DOP-2026/{proj.code.split('-')[2] || '01'}
+                                  </h4>
+                                </div>
+                                <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
+                                  ✓ Contrato Vigente Protocolizado
+                                </span>
+                              </div>
+
+                              {/* Grid de Información de Empresa y Pólizas */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Ficha del Contratista */}
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                                  <h5 className="font-bold uppercase tracking-wider text-slate-700 flex items-center">
+                                    <FolderKanban className="w-4 h-4 mr-1.5 text-sky-600" />
+                                    Empresa Contratista Adjudicada
+                                  </h5>
+                                  <div className="space-y-1.5 pt-1">
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-500">Razón Social:</span>
+                                      <span className="font-bold text-slate-900">{contractorName}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-500">Monto Contratado:</span>
+                                      <span className="font-bold text-slate-900">Bs. {proj.budget_allocated?.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-500">Plazo Contractual:</span>
+                                      <span className="font-semibold text-slate-800">{proj.start_date_planned} al {proj.end_date_planned}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-500">Orden de Proceder:</span>
+                                      <span className="font-mono font-bold text-emerald-700">Emitida el {proj.start_date_planned}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Garantías y Pólizas de Seguro (D.S. 0181) */}
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                                  <h5 className="font-bold uppercase tracking-wider text-slate-700 flex items-center">
+                                    <ShieldCheck className="w-4 h-4 mr-1.5 text-emerald-600" />
+                                    Pólizas de Garantía Bancaria (D.S. 0181)
+                                  </h5>
+                                  <div className="space-y-2 pt-1">
+                                    <div className="p-2.5 bg-white rounded-xl border border-slate-200 flex items-center justify-between">
+                                      <div>
+                                        <span className="font-bold text-slate-800 block text-[11px]">Cumplimiento de Contrato (7%)</span>
+                                        <span className="text-[10px] text-slate-500">Bs. {(proj.budget_allocated * 0.07).toLocaleString()} · Alianza Seguros</span>
+                                      </div>
+                                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Vigente</span>
+                                    </div>
+                                    <div className="p-2.5 bg-white rounded-xl border border-slate-200 flex items-center justify-between">
+                                      <div>
+                                        <span className="font-bold text-slate-800 block text-[11px]">Correcta Inversión de Anticipo (20%)</span>
+                                        <span className="text-[10px] text-slate-500">Bs. {(proj.budget_allocated * 0.20).toLocaleString()} · En amortización</span>
+                                      </div>
+                                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800">Amortizando</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Trazabilidad de Planillas de Avance y Pagos */}
+                              <div className="space-y-2 pt-2">
+                                <h5 className="font-bold text-xs uppercase tracking-wider text-slate-700">
+                                  Planillas de Avance y Certificados de Medición
+                                </h5>
+                                <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
+                                  <table className="w-full text-left">
+                                    <thead className="bg-slate-100 text-slate-700 font-bold">
+                                      <tr>
+                                        <th className="p-2.5">Documento</th>
+                                        <th className="p-2.5">Monto Certificado (Bs.)</th>
+                                        <th className="p-2.5">Respaldo Técnico</th>
+                                        <th className="p-2.5">Fiscal de Obra</th>
+                                        <th className="p-2.5">Estado Financiero</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                      <tr>
+                                        <td className="p-2.5 font-semibold">Anticipo de Obra (20%)</td>
+                                        <td className="p-2.5 font-bold">Bs. {(proj.budget_allocated * 0.20).toLocaleString()}</td>
+                                        <td className="p-2.5 text-slate-500">Movilización e instalación de faenas</td>
+                                        <td className="p-2.5 text-slate-700">Ing. Laura Vargas</td>
+                                        <td className="p-2.5"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Desembolsado</span></td>
+                                      </tr>
+                                      <tr>
+                                        <td className="p-2.5 font-semibold">Planilla N° 1 de Avance</td>
+                                        <td className="p-2.5 font-bold">Bs. {(proj.budget_allocated * 0.08).toLocaleString()}</td>
+                                        <td className="p-2.5 text-emerald-700 font-bold">Acta de Medición en Libro de Órdenes</td>
+                                        <td className="p-2.5 text-slate-700">Ing. Laura Vargas</td>
+                                        <td className="p-2.5"><span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Aprobado y Pagado</span></td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     );
                   })()}

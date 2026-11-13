@@ -44,6 +44,47 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
     }
   };
 
+  const handleExportExcel = () => {
+    const headers = [
+      'Código Proyecto',
+      'Nombre de la Obra',
+      'Área Estratégica',
+      'Presupuesto Asignado (Bs.)',
+      'Avance Físico Real (%)',
+      'Avance Programado (%)',
+      'Índice de Cumplimiento',
+      'Semáforo de Gestión',
+      'Estado'
+    ];
+
+    const rows: string[][] = [];
+    summary.areas_summary.forEach((area) => {
+      (area.projects_summary || []).forEach((p) => {
+        rows.push([
+          `"${p.code}"`,
+          `"${p.name.replace(/"/g, '""')}"`,
+          `"${area.name}"`,
+          String(p.budget_allocated || 0),
+          String(p.real_progress_pct),
+          String(p.planned_progress_pct),
+          String(p.compliance_index),
+          p.traffic_light.toUpperCase(),
+          `"${p.status}"`
+        ]);
+      });
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `SGP_Reporte_Ejecucion_Fisica_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Banner Superior Institucional */}
@@ -63,13 +104,22 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={handleExportExcel}
+              className="inline-flex items-center space-x-2 bg-emerald-600/90 hover:bg-emerald-600 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-emerald-500 transition-all shadow-sm"
+              title="Descargar matriz en Excel para remisión al Concejo y Planificación"
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>Exportar Excel (CSV)</span>
+            </button>
+
             <button
               onClick={() => onNavigateToReport ? onNavigateToReport() : window.print()}
               className="inline-flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-white/20 transition-all shadow-sm"
             >
               <Download className="w-4 h-4" />
-              <span>Ver Informe Oficial Imprimible</span>
+              <span>Informe Imprimible</span>
             </button>
           </div>
         </div>
