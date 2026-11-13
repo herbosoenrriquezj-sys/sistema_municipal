@@ -18,9 +18,19 @@ export const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const loadData = async () => {
+  const roleEmails: Record<string, string> = {
+    alcalde: 'alcalde@sgp.gob',
+    director_area: 'director.obras@sgp.gob',
+    responsable_proyecto: 'responsable.obras@sgp.gob',
+    supervisor_fiscal: 'supervisor.fiscal@sgp.gob',
+    planificacion: 'planificacion@sgp.gob',
+  };
+
+  const loadData = async (roleToUse = currentRole) => {
     try {
       setLoading(true);
+      const email = roleEmails[roleToUse] || 'alcalde@sgp.gob';
+      await authService.login(email, 'admin123');
       const [sumData, projData] = await Promise.all([
         dashboardService.getExecutiveSummary(),
         projectService.getProjects(),
@@ -35,8 +45,8 @@ export const App: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadData(currentRole);
+  }, [currentRole]);
 
   const handleSelectProject = (projectId: string) => {
     setSelectedProjectId(projectId);

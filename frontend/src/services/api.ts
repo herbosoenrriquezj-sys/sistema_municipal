@@ -18,6 +18,37 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      const currentRole = localStorage.getItem('sgp_user_role') || 'alcalde';
+      const roleEmails: Record<string, string> = {
+        alcalde: 'alcalde@sgp.gob',
+        director_area: 'director.obras@sgp.gob',
+        responsable_proyecto: 'responsable.obras@sgp.gob',
+        supervisor_fiscal: 'supervisor.fiscal@sgp.gob',
+        planificacion: 'planificacion@sgp.gob',
+      };
+      const email = roleEmails[currentRole] || 'alcalde@sgp.gob';
+      try {
+        const loginRes = await axios.post(`${API_BASE}/auth/login-json`, { email, password: 'admin123' });
+        const newToken = loginRes.data.access_token;
+        localStorage.setItem('sgp_token', newToken);
+        localStorage.setItem('sgp_user_role', loginRes.data.role);
+        api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+        return api(originalRequest);
+      } catch (loginErr) {
+        return Promise.reject(error);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const authService = {
   login: async (email: string, password: string = 'admin123') => {
     try {
@@ -25,10 +56,10 @@ export const authService = {
       localStorage.setItem('sgp_token', res.data.access_token);
       localStorage.setItem('sgp_user_role', res.data.role);
       localStorage.setItem('sgp_user_name', res.data.user_name);
+      api.defaults.headers.common['Authorization'] = `Bearer ${res.data.access_token}`;
       return res.data;
     } catch (err) {
       console.warn('API de login no disponible, usando sesión local');
-      // Fallback para demo
       return {
         access_token: 'demo-token',
         role: 'alcalde',
