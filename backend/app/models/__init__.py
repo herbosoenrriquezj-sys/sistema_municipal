@@ -5,6 +5,7 @@ from app.models.strategic import StrategicArea, StrategicObjective, Indicator
 from app.models.project import Project, ProjectComponent, ProjectActivity, ActivityPlannedPeriod
 from app.models.tracking import ActivityProgressReport, ProgressEvidence
 from app.models.change_control import ProjectBaseline, ReprogrammingRequest
+from app.models.citizen import CitizenInquiry
 
 __all__ = [
     "Base",
@@ -21,5 +22,6 @@ __all__ = [
     "ProgressEvidence",
     "ProjectBaseline",
     "ReprogrammingRequest",
+    "CitizenInquiry",
 ]
 

@@ -219,6 +219,11 @@ export const projectService = {
   reviewReprogramming: async (requestId: string, decision: 'approved' | 'rejected', review_notes: string) => {
     const res = await api.post(`/projects/reprogramming/${requestId}/review`, { decision, review_notes });
     return res.data;
+  },
+
+  getSCurve: async (projectId: string) => {
+    const res = await api.get(`/projects/${projectId}/s-curve`);
+    return res.data;
   }
 };
 
@@ -266,6 +271,33 @@ export const strategicService = {
 
   createIndicator: async (data: any) => {
     const res = await api.post('/strategic/indicators', data);
+    return res.data;
+  }
+};
+
+export const transparencyService = {
+  getPublicProjects: async (district?: string, search?: string) => {
+    const params = new URLSearchParams();
+    if (district && district !== 'Todos') params.append('district', district);
+    if (search) params.append('search', search);
+    const res = await api.get(`/transparency/public-projects?${params.toString()}`);
+    return res.data;
+  },
+
+  getInquiries: async (district?: string) => {
+    const params = new URLSearchParams();
+    if (district && district !== 'Todos') params.append('district', district);
+    const res = await api.get(`/transparency/inquiries?${params.toString()}`);
+    return res.data;
+  },
+
+  submitInquiry: async (data: any) => {
+    const res = await api.post('/transparency/inquiries', data);
+    return res.data;
+  },
+
+  respondInquiry: async (inquiryId: string, response: string) => {
+    const res = await api.post(`/transparency/inquiries/${inquiryId}/respond`, { response });
     return res.data;
   }
 };

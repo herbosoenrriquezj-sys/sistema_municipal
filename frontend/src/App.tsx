@@ -6,6 +6,7 @@ import { FieldReportingView } from './components/FieldReportingView';
 import { StrategicView } from './components/StrategicView';
 import { OfficialReportView } from './components/OfficialReportView';
 import { MunicipalMapView } from './components/MunicipalMapView';
+import { CitizenPortalView } from './components/CitizenPortalView';
 import { dashboardService, projectService, authService } from './services/api';
 import { ExecutiveSummary, Project } from './types';
 import { Loader2, RefreshCw } from 'lucide-react';
@@ -25,6 +26,7 @@ export const App: React.FC = () => {
     responsable_proyecto: 'responsable.obras@sgp.gob',
     supervisor_fiscal: 'supervisor.fiscal@sgp.gob',
     planificacion: 'planificacion@sgp.gob',
+    control_social: 'supervisor.fiscal@sgp.gob',
   };
 
   const loadData = async (roleToUse = currentRole) => {
@@ -117,6 +119,12 @@ export const App: React.FC = () => {
             {currentTab === 'report' && (
               <OfficialReportView
                 onBack={() => setCurrentTab('dashboard')}
+              />
+            )}
+
+            {currentTab === 'citizen' && (
+              <CitizenPortalView
+                currentRole={currentRole}
               />
             )}
           </>

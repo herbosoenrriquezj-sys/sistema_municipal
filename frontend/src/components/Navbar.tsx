@@ -21,6 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { key: 'director_area', label: 'Director Obras', email: 'director.obras@sgp.gob', badgeColor: 'bg-blue-100 text-blue-800' },
     { key: 'responsable_proyecto', label: 'Residente Obra', email: 'responsable.obras@sgp.gob', badgeColor: 'bg-amber-100 text-amber-800' },
     { key: 'supervisor_fiscal', label: 'Fiscal / Supervisor', email: 'supervisor.fiscal@sgp.gob', badgeColor: 'bg-emerald-100 text-emerald-800' },
+    { key: 'control_social', label: 'Vecino / Control Social', email: 'vecino.sucre@sgp.gob', badgeColor: 'bg-amber-100 text-amber-800' },
   ];
 
   return (
@@ -118,6 +119,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               <FileText className="w-4 h-4 text-slate-700" />
               <span>Reporte Oficial</span>
             </button>
+
+            <button
+              onClick={() => setCurrentTab('citizen')}
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                currentTab === 'citizen'
+                  ? 'bg-amber-50 text-amber-800 border border-amber-300 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4 text-amber-600" />
+              <span>Portal Ciudadano</span>
+            </button>
           </nav>
 
           {/* Selector de Rol Demostrativo */}
@@ -194,6 +207,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <FileText className="w-5 h-5 mb-0.5" />
           Reporte
+        </button>
+        <button
+          onClick={() => setCurrentTab('citizen')}
+          className={`flex flex-col items-center text-xs font-semibold ${
+            currentTab === 'citizen' ? 'text-amber-600' : 'text-slate-500'
+          }`}
+        >
+          <ShieldCheck className="w-5 h-5 mb-0.5" />
+          Vecinal
         </button>
       </div>
     </header>

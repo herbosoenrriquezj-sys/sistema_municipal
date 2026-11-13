@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { 
   FolderKanban, CheckCircle2, Lock, Calendar, DollarSign, MapPin, 
   ChevronDown, ChevronRight, Layers, FileCheck2, Sparkles, Check,
-  AlertTriangle, History, Plus, X, RefreshCw
+  AlertTriangle, History, Plus, X, RefreshCw, CalendarDays, TrendingUp,
+  BarChart3, AlertOctagon, HelpCircle
 } from 'lucide-react';
-import { Project } from '../types';
+import { Project, SCurveData } from '../types';
 import { projectService } from '../services/api';
 
 interface ProjectsViewProps {
@@ -22,6 +23,11 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   const [freezing, setFreezing] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Pestañas por proyecto: 'edt' | 'gantt' | 'scurve'
+  const [activeProjectTabs, setActiveProjectTabs] = useState<{ [projectId: string]: 'edt' | 'gantt' | 'scurve' }>({});
+  const [sCurveCache, setSCurveCache] = useState<{ [projectId: string]: SCurveData }>({});
+  const [loadingSCurve, setLoadingSCurve] = useState<string | null>(null);
+
   // Estados para Modal de Reprogramación (Módulo 4.4)
   const [reprogModalProject, setReprogModalProject] = useState<Project | null>(null);
   const [causeCategory, setCauseCategory] = useState<string>('climatic_factors');
@@ -29,14 +35,34 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
   const [extensionDays, setExtensionDays] = useState<number>(30);
   const [submittingReprog, setSubmittingReprog] = useState<boolean>(false);
 
-  // Estados para Modal de Nueva Obra
+  // Estados para Modal de Nueva Obra (Sucre)
   const [showNewProjectModal, setShowNewProjectModal] = useState<boolean>(false);
-  const [newCode, setNewCode] = useState<string>('PRY-2026-OB-03');
-  const [newName, setNewName] = useState<string>('Construcción Tinglado y Cancha Polifuncional OTB Esperanza');
+  const [newCode, setNewCode] = useState<string>('PRY-2026-OB-05');
+  const [newName, setNewName] = useState<string>('Construcción Tinglado y Cancha Polifuncional Barrio La Esperanza');
   const [newBudget, setNewBudget] = useState<number>(450000);
-  const [newLocation, setNewLocation] = useState<string>('Distrito 3, OTB La Esperanza');
+  const [newLocation, setNewLocation] = useState<string>('Distrito 3, Barrio La Esperanza - Sucre');
   const [newFunding, setNewFunding] = useState<string>('Coparticipación Tributaria');
   const [creatingProject, setCreatingProject] = useState<boolean>(false);
+
+  const loadSCurve = async (projectId: string) => {
+    if (sCurveCache[projectId]) return;
+    try {
+      setLoadingSCurve(projectId);
+      const data = await projectService.getSCurve(projectId);
+      setSCurveCache((prev) => ({ ...prev, [projectId]: data }));
+    } catch (err) {
+      console.error('Error cargando Curva S:', err);
+    } finally {
+      setLoadingSCurve(null);
+    }
+  };
+
+  const setProjectTab = (projectId: string, tab: 'edt' | 'gantt' | 'scurve') => {
+    setActiveProjectTabs((prev) => ({ ...prev, [projectId]: tab }));
+    if (tab === 'scurve') {
+      loadSCurve(projectId);
+    }
+  };
 
   const handleFreeze = async (projectId: string) => {
     try {
@@ -241,59 +267,321 @@ export const ProjectsView: React.FC<ProjectsViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Componentes y Actividades */}
-                  <div className="space-y-4">
-                    <h3 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider flex items-center">
-                      <Layers className="w-4 h-4 mr-2 text-indigo-600" />
-                      Estructura de Desglose del Trabajo (EDT)
-                    </h3>
+                  {/* Pestañas de Visualización del Proyecto */}
+                  {(() => {
+                    const currentTab = activeProjectTabs[proj.id] || 'edt';
+                    const scurve = sCurveCache[proj.id];
+                    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-                    {proj.components && proj.components.length > 0 ? (
-                      proj.components.map((comp) => (
-                        <div key={comp.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-                          <div className="bg-slate-100/80 px-4 py-2.5 flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-mono text-xs font-bold text-slate-600">{comp.code}</span>
-                              <span className="font-bold text-sm text-slate-800">{comp.name}</span>
-                            </div>
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                              Peso en Obra: {comp.weight_percentage}%
-                            </span>
-                          </div>
+                    const getMonthIdx = (dateStr: string) => {
+                      if (!dateStr) return 0;
+                      const parts = dateStr.split('-');
+                      if (parts.length >= 2) return Math.max(0, Math.min(11, parseInt(parts[1], 10) - 1));
+                      return 0;
+                    };
 
-                          <div className="p-3 divide-y divide-slate-100">
-                            {comp.activities && comp.activities.length > 0 ? (
-                              comp.activities.map((act) => (
-                                <div key={act.id} className="py-2.5 px-2 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2">
-                                  <div>
-                                    <span className="font-mono font-bold text-slate-500 mr-2">{act.code}</span>
-                                    <span className="font-semibold text-slate-900">{act.name}</span>
-                                    <span className="text-slate-400 ml-2">
-                                      ({act.start_date} al {act.end_date})
+                    return (
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap border-b border-slate-200 gap-2 pb-2">
+                          <button
+                            onClick={() => setProjectTab(proj.id, 'edt')}
+                            className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                              currentTab === 'edt'
+                                ? 'bg-sky-700 text-white shadow-xs'
+                                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                            }`}
+                          >
+                            <Layers className="w-4 h-4" />
+                            <span>Estructura EDT (WBS)</span>
+                          </button>
+                          <button
+                            onClick={() => setProjectTab(proj.id, 'gantt')}
+                            className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                              currentTab === 'gantt'
+                                ? 'bg-sky-700 text-white shadow-xs'
+                                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                            }`}
+                          >
+                            <CalendarDays className="w-4 h-4" />
+                            <span>Cronograma Gantt Mensual</span>
+                          </button>
+                          <button
+                            onClick={() => setProjectTab(proj.id, 'scurve')}
+                            className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                              currentTab === 'scurve'
+                                ? 'bg-sky-700 text-white shadow-xs'
+                                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                            }`}
+                          >
+                            <TrendingUp className="w-4 h-4" />
+                            <span>Curva "S" (Físico vs Financiero)</span>
+                          </button>
+                        </div>
+
+                        {/* VISTA 1: ESTRUCTURA EDT (WBS) */}
+                        {currentTab === 'edt' && (
+                          <div className="space-y-4">
+                            <h3 className="font-extrabold text-sm text-slate-800 uppercase tracking-wider flex items-center">
+                              <Layers className="w-4 h-4 mr-2 text-indigo-600" />
+                              Estructura de Desglose del Trabajo (EDT)
+                            </h3>
+
+                            {proj.components && proj.components.length > 0 ? (
+                              proj.components.map((comp) => (
+                                <div key={comp.id} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+                                  <div className="bg-slate-100/80 px-4 py-2.5 flex items-center justify-between">
+                                    <div className="flex items-center space-x-2">
+                                      <span className="font-mono text-xs font-bold text-slate-600">{comp.code}</span>
+                                      <span className="font-bold text-sm text-slate-800">{comp.name}</span>
+                                    </div>
+                                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                      Peso en Obra: {comp.weight_percentage}%
                                     </span>
                                   </div>
-                                  <div className="flex items-center space-x-4">
-                                    <span className="text-slate-600">
-                                      Meta: <strong className="text-slate-900">{act.total_target_quantity} {act.unit_of_measure}</strong>
-                                    </span>
-                                    <span className="font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                                      Peso: {act.weight_percentage}%
-                                    </span>
+
+                                  <div className="p-3 divide-y divide-slate-100">
+                                    {comp.activities && comp.activities.length > 0 ? (
+                                      comp.activities.map((act) => (
+                                        <div key={act.id} className="py-2.5 px-2 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2">
+                                          <div>
+                                            <span className="font-mono font-bold text-slate-500 mr-2">{act.code}</span>
+                                            <span className="font-semibold text-slate-900">{act.name}</span>
+                                            <span className="text-slate-400 ml-2">
+                                              ({act.start_date} al {act.end_date})
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center space-x-4">
+                                            <span className="text-slate-600">
+                                              Meta: <strong className="text-slate-900">{act.total_target_quantity} {act.unit_of_measure}</strong>
+                                            </span>
+                                            <span className="font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                                              Peso: {act.weight_percentage}%
+                                            </span>
+                                          </div>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <p className="text-xs text-slate-400 italic py-2 px-2">
+                                        Sin actividades registradas en este componente.
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
                               ))
                             ) : (
-                              <p className="text-xs text-slate-400 italic py-2 px-2">
-                                Sin actividades registradas en este componente.
-                              </p>
+                              <p className="text-xs text-slate-500 italic">No hay componentes registrados.</p>
                             )}
                           </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-slate-500 italic">No hay componentes registrados.</p>
-                    )}
-                  </div>
+                        )}
+
+                        {/* VISTA 2: CRONOGRAMA GANTT MENSUAL (MÓDULO 4.2) */}
+                        {currentTab === 'gantt' && (
+                          <div className="space-y-4 bg-white p-5 rounded-2xl border border-slate-200 overflow-x-auto shadow-xs">
+                            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                              <div>
+                                <h3 className="font-bold text-sm text-slate-900 flex items-center">
+                                  <CalendarDays className="w-4 h-4 mr-2 text-sky-600" />
+                                  Cronograma Oficial de Ejecución de Obras (Ene - Dic 2026)
+                                </h3>
+                                <p className="text-xs text-slate-500">
+                                  Distribución temporal de hitos constructivos y barras de duración por actividad.
+                                </p>
+                              </div>
+                              <div className="flex items-center space-x-3 text-[11px] font-bold">
+                                <span className="flex items-center"><span className="w-3 h-3 rounded bg-sky-500 mr-1.5"></span> Programado</span>
+                                <span className="flex items-center"><span className="w-3 h-3 rounded bg-emerald-500 mr-1.5"></span> Ejecutado</span>
+                              </div>
+                            </div>
+
+                            <div className="min-w-[760px]">
+                              {/* Cabecera de los 12 meses */}
+                              <div className="grid grid-cols-12 gap-1 text-center font-mono text-xs font-bold text-slate-600 bg-slate-100 py-2 rounded-xl mb-3">
+                                {months.map((m, idx) => (
+                                  <div key={m} className={`${idx <= 1 ? 'text-sky-800 font-extrabold bg-sky-100/70 rounded py-0.5' : ''}`}>
+                                    {m}
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Filas por Componente y Actividad */}
+                              <div className="space-y-4">
+                                {proj.components?.map((comp) => (
+                                  <div key={comp.id} className="space-y-2">
+                                    <div className="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/80 flex items-center justify-between text-xs font-bold text-slate-800">
+                                      <span>{comp.code} - {comp.name}</span>
+                                      <span className="text-indigo-600">{comp.weight_percentage}% peso</span>
+                                    </div>
+
+                                    {comp.activities?.map((act) => {
+                                      const startIdx = getMonthIdx(act.start_date);
+                                      const endIdx = getMonthIdx(act.end_date);
+                                      const span = Math.max(1, endIdx - startIdx + 1);
+                                      const leftPct = (startIdx / 12) * 100;
+                                      const widthPct = (span / 12) * 100;
+
+                                      return (
+                                        <div key={act.id} className="space-y-1 py-1 border-b border-slate-100">
+                                          <div className="flex justify-between text-xs">
+                                            <span className="font-semibold text-slate-800">
+                                              {act.code}: {act.name}
+                                            </span>
+                                            <span className="text-slate-500 text-[11px]">
+                                              {act.total_target_quantity} {act.unit_of_measure} ({act.start_date} al {act.end_date})
+                                            </span>
+                                          </div>
+
+                                          {/* Barra de Gantt en el grid de 12 meses */}
+                                          <div className="relative h-6 bg-slate-100 rounded-lg overflow-hidden border border-slate-200/60">
+                                            {/* Fondo de rejilla mensual */}
+                                            <div className="absolute inset-0 grid grid-cols-12 divide-x divide-slate-200/50 pointer-events-none">
+                                              {months.map((_, i) => <div key={i} className="h-full"></div>)}
+                                            </div>
+
+                                            {/* Barra de duración de la actividad */}
+                                            <div
+                                              style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
+                                              className="absolute top-1 bottom-1 bg-sky-600/90 rounded-md shadow-xs flex items-center px-2 text-white text-[10px] font-bold overflow-hidden"
+                                            >
+                                              <span className="truncate">{act.name}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* VISTA 3: CURVA S (FÍSICO VS FINANCIERO - MÓDULO 8.3) */}
+                        {currentTab === 'scurve' && (
+                          <div className="space-y-5 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs">
+                            {loadingSCurve === proj.id ? (
+                              <div className="p-8 text-center text-slate-500 text-xs font-semibold flex items-center justify-center space-x-2">
+                                <RefreshCw className="w-4 h-4 animate-spin text-sky-600" />
+                                <span>Calculando curva acumulada y desbalances contractuales...</span>
+                              </div>
+                            ) : scurve ? (
+                              <>
+                                {/* KPIs Principales de Auditoría */}
+                                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                                  <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
+                                      Presupuesto Oficial
+                                    </span>
+                                    <span className="text-base font-extrabold text-slate-900 mt-0.5 block">
+                                      Bs. {scurve.budget_allocated.toLocaleString()}
+                                    </span>
+                                  </div>
+
+                                  <div className="p-3.5 bg-emerald-50/70 rounded-2xl border border-emerald-200">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">
+                                      Avance Físico Auditado
+                                    </span>
+                                    <div className="flex items-baseline space-x-1.5 mt-0.5">
+                                      <span className="text-base font-black text-emerald-700">{scurve.real_physical_pct}%</span>
+                                      <span className="text-xs text-emerald-600 font-semibold">/ {scurve.planned_physical_pct}% prog.</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="p-3.5 bg-purple-50/70 rounded-2xl border border-purple-200">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-800 block">
+                                      Desembolso Financiero
+                                    </span>
+                                    <div className="flex items-baseline space-x-1.5 mt-0.5">
+                                      <span className="text-base font-black text-purple-700">{scurve.real_financial_pct}%</span>
+                                      <span className="text-xs text-purple-600 font-semibold">(Bs. {scurve.real_financial_amount?.toLocaleString()})</span>
+                                    </div>
+                                  </div>
+
+                                  <div className={`p-3.5 rounded-2xl border ${
+                                    scurve.has_overpayment_alert 
+                                      ? 'bg-rose-50 border-rose-300 text-rose-800'
+                                      : 'bg-slate-50 border-slate-200 text-slate-800'
+                                  }`}>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider block">
+                                      Diferencial Físico-Financiero
+                                    </span>
+                                    <span className="text-base font-black mt-0.5 block">
+                                      {scurve.financial_physical_gap > 0 ? `+${scurve.financial_physical_gap}%` : `${scurve.financial_physical_gap}%`}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* ALERTA CRÍTICA DE SOBREPAGO (Si corresponde) */}
+                                {scurve.has_overpayment_alert && (
+                                  <div className="p-4 bg-rose-50 border-2 border-rose-400 rounded-2xl text-rose-900 space-y-1.5 animate-fadeIn">
+                                    <div className="flex items-center space-x-2 font-black text-sm text-rose-800">
+                                      <AlertOctagon className="w-5 h-5 text-rose-600 flex-shrink-0" />
+                                      <span>ALERTA DE FISCALIZACIÓN Y CONTRALORÍA: {scurve.alert_title}</span>
+                                    </div>
+                                    <p className="text-xs font-medium text-rose-700 pl-7 leading-relaxed">
+                                      {scurve.alert_message}
+                                    </p>
+                                  </div>
+                                )}
+
+                                {/* Gráfico de Comparación Mensual */}
+                                <div className="space-y-3 pt-2">
+                                  <h4 className="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center justify-between">
+                                    <span>Evolución Mensual: Planificado vs Avance Real vs Desembolso</span>
+                                    <div className="flex items-center space-x-4 text-[11px] font-semibold">
+                                      <span className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-sky-500 mr-1.5"></span> Prog. Físico (%)</span>
+                                      <span className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5"></span> Real Físico (%)</span>
+                                      <span className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-purple-600 mr-1.5"></span> Pagado Financiero (%)</span>
+                                    </div>
+                                  </h4>
+
+                                  {/* Barras de comparación por mes */}
+                                  <div className="grid grid-cols-12 gap-1.5 pt-4 pb-2 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                                    {scurve.timeline.map((item) => (
+                                      <div key={item.month_number} className="flex flex-col items-center space-y-1.5">
+                                        {/* Barra vertical comparativa */}
+                                        <div className="h-28 w-full flex items-end justify-center space-x-0.5 bg-white rounded-lg p-1 border border-slate-200">
+                                          {/* Barra Planificada */}
+                                          <div
+                                            style={{ height: `${Math.min(100, item.planned_physical_pct)}%` }}
+                                            className="w-1.5 bg-sky-400 rounded-t"
+                                            title={`Planificado: ${item.planned_physical_pct}%`}
+                                          ></div>
+
+                                          {/* Barra Real Físico */}
+                                          {item.real_physical_pct !== null && (
+                                            <div
+                                              style={{ height: `${Math.min(100, item.real_physical_pct)}%` }}
+                                              className="w-1.5 bg-emerald-500 rounded-t"
+                                              title={`Real Físico: ${item.real_physical_pct}%`}
+                                            ></div>
+                                          )}
+
+                                          {/* Barra Desembolso Financiero */}
+                                          {item.real_financial_pct !== null && (
+                                            <div
+                                              style={{ height: `${Math.min(100, item.real_financial_pct)}%` }}
+                                              className="w-1.5 bg-purple-600 rounded-t"
+                                              title={`Financiero: ${item.real_financial_pct}%`}
+                                            ></div>
+                                          )}
+                                        </div>
+
+                                        <span className="text-[10px] font-mono font-bold text-slate-600">
+                                          {item.month_name}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              </>
+                            ) : (
+                              <p className="text-xs text-slate-400">No se pudieron cargar los datos de la Curva S.</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>

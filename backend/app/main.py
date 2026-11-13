@@ -26,13 +26,14 @@ app.add_middleware(
 )
 
 # Incluir Rutas de la API
-from app.api.routes import auth, strategic, projects, tracking, dashboard
+from app.api.routes import auth, strategic, projects, tracking, dashboard, transparency
 
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(strategic.router, prefix=settings.API_V1_STR)
 app.include_router(projects.router, prefix=settings.API_V1_STR)
 app.include_router(tracking.router, prefix=settings.API_V1_STR)
 app.include_router(dashboard.router, prefix=settings.API_V1_STR)
+app.include_router(transparency.router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():

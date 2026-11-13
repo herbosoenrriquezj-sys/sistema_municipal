@@ -89,3 +89,67 @@ export interface Project {
   components: ProjectComponent[];
 }
 
+export interface SCurveTimelinePoint {
+  month_number: number;
+  month_name: string;
+  planned_physical_pct: number;
+  planned_financial_pct: number;
+  planned_financial_bs: number;
+  real_physical_pct: number | null;
+  real_financial_pct: number | null;
+  real_financial_bs: number | null;
+}
+
+export interface SCurveData {
+  project_id: string;
+  code: string;
+  name: string;
+  budget_allocated: number;
+  real_physical_pct: number;
+  planned_physical_pct: number;
+  real_financial_pct: number;
+  real_financial_amount: number;
+  planned_financial_pct: number;
+  financial_physical_gap: number;
+  has_overpayment_alert: boolean;
+  alert_title: string;
+  alert_message: string;
+  timeline: SCurveTimelinePoint[];
+}
+
+export interface CitizenInquiry {
+  id: string;
+  district: string;
+  citizen_name: string;
+  citizen_contact: string;
+  organization?: string | null;
+  category: string;
+  message: string;
+  status: 'pending' | 'in_review' | 'responded';
+  official_response?: string | null;
+  created_at: string;
+  responded_at?: string | null;
+}
+
+export interface PublicProject {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  location_name: string;
+  latitude: number;
+  longitude: number;
+  budget_allocated: number;
+  funding_source: string;
+  start_date: string;
+  end_date: string;
+  status: string;
+  real_progress_pct: number;
+  planned_progress_pct: number;
+  compliance_index: number;
+  traffic_light: 'green' | 'yellow' | 'red';
+  photos: string[];
+  supervisor_name: string;
+}
+
+
