@@ -114,7 +114,7 @@ export const dashboardService = {
               {
                 project_id: 'p1',
                 code: 'PRY-2026-OB-01',
-                name: 'Pavimentación y Drenaje Pluvial Avenida Integración Distrito 4',
+                name: 'Pavimentación y Drenaje Pluvial Avenida Marcelo Quiroga Santa Cruz',
                 status: 'in_execution',
                 real_progress_pct: 13.0,
                 planned_progress_pct: 30.0,
@@ -138,7 +138,7 @@ export const dashboardService = {
               {
                 project_id: 'p2',
                 code: 'PRY-2026-ED-02',
-                name: 'Construcción Centro de Salud Integral Comunitario',
+                name: 'Construcción Centro de Salud Integral Lajastambo Distrito 3',
                 status: 'in_execution',
                 real_progress_pct: 5.83,
                 planned_progress_pct: 25.0,
@@ -154,7 +154,7 @@ export const dashboardService = {
           {
             project_id: 'p1',
             code: 'PRY-2026-OB-01',
-            name: 'Pavimentación y Drenaje Pluvial Avenida Integración Distrito 4',
+            name: 'Pavimentación y Drenaje Pluvial Avenida Marcelo Quiroga Santa Cruz',
             area_name: 'Infraestructura Urbana y Obras Públicas',
             budget: 1850000.0,
             real_progress_pct: 13.0,
@@ -164,7 +164,7 @@ export const dashboardService = {
           {
             project_id: 'p2',
             code: 'PRY-2026-ED-02',
-            name: 'Construcción Centro de Salud Integral Comunitario',
+            name: 'Construcción Centro de Salud Integral Lajastambo Distrito 3',
             area_name: 'Desarrollo Humano, Educación y Salud',
             budget: 2400000.0,
             real_progress_pct: 5.83,

@@ -122,7 +122,7 @@ def get_official_report_data(
         "report_code": f"INF-TEC-{datetime.now().year}-001",
         "generated_at": datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M"),
         "institution_name": current_user.tenant.name if current_user.tenant else "Gobierno Autónomo Municipal",
-        "department_state": current_user.tenant.department_state if current_user.tenant else "Cochabamba",
+        "department_state": current_user.tenant.department_state if current_user.tenant else "Chuquisaca",
         "evaluated_period": f"Gestión Fiscal {datetime.now().year} - Ejecución Física Acumulada",
         "summary": exec_summary,
         "total_budget": round(total_budget, 2),

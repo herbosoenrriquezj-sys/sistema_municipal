@@ -17,14 +17,14 @@ def seed():
 
     try:
         # 1. Crear Municipio (Tenant)
-        tenant = db.query(Tenant).filter(Tenant.code == "MUN-DEMO-01").first()
+        tenant = db.query(Tenant).filter(Tenant.code == "MUN-SUCRE-01").first()
         if not tenant:
             tenant = Tenant(
-                code="MUN-DEMO-01",
-                name="Gobierno Autónomo Municipal de Demostración",
-                department_state="Cochabamba",
+                code="MUN-SUCRE-01",
+                name="Gobierno Autónomo Municipal de Sucre",
+                department_state="Chuquisaca",
                 country="Bolivia",
-                slug="demo",
+                slug="sucre",
                 subscription_tier="enterprise",
                 settings_json={"threshold_green": 90.0, "threshold_yellow": 70.0}
             )
@@ -125,11 +125,11 @@ def seed():
                 responsible_id=users_dict["responsable_proyecto"].id,
                 supervisor_id=users_dict["supervisor_fiscal"].id,
                 code="PRY-2026-OB-01",
-                name="Pavimentación y Drenaje Pluvial Avenida Integración Distrito 4",
-                description="Pavimentación rígida de 1.2 km incluyendo cunetas y señalización.",
-                location_name="Distrito 4, OTB Los Álamos",
-                latitude=-17.3935,
-                longitude=-66.1570,
+                name="Pavimentación y Drenaje Pluvial Avenida Marcelo Quiroga Santa Cruz",
+                description="Pavimentación rígida y obras de drenaje pluvial en el corredor troncal norte.",
+                location_name="Distrito 2, Zona Hospital Universitario",
+                latitude=-19.0280,
+                longitude=-65.2630,
                 budget_allocated=1850000.00,
                 funding_source="Recursos Propios (IDH)",
                 start_date_planned=date(2026, 1, 10),
@@ -179,13 +179,13 @@ def seed():
                 file_name="inspeccion_maquinaria_sector_a.jpg",
                 file_url="https://images.unsplash.com/photo-1541888946425-d0fbb186156f?w=800",
                 file_type="image/jpeg", file_size_bytes=2450000,
-                latitude=-17.3935, longitude=-66.1570,
+                latitude=-19.0280, longitude=-65.2630,
                 captured_at=datetime.now(timezone.utc),
-                description="Equipo pesado realizando corte y perfilado de rasante en progresiva 0+200"
+                description="Equipo pesado realizando corte y perfilado en Av. Marcelo Quiroga Santa Cruz"
             )
             db.add(ev1)
 
-        # 6. Proyecto 2: Construcción Centro de Salud (Proyecto en Desvío - Semáforo Rojo)
+        # 6. Proyecto 2: Construcción Centro de Salud Lajastambo (Semáforo Rojo)
         proj2 = db.query(Project).filter(Project.tenant_id == tenant.id, Project.code == "PRY-2026-ED-02").first()
         if not proj2:
             proj2 = Project(
@@ -194,11 +194,11 @@ def seed():
                 responsible_id=users_dict["responsable_proyecto"].id,
                 supervisor_id=users_dict["supervisor_fiscal"].id,
                 code="PRY-2026-ED-02",
-                name="Construcción Centro de Salud Integral Comunitario",
-                description="Construcción de infraestructura médica de 2 plantas con sala de partos.",
-                location_name="Distrito 8, Zona San Juan",
-                latitude=-17.4080,
-                longitude=-66.1420,
+                name="Construcción Centro de Salud Integral Lajastambo Distrito 3",
+                description="Construcción de infraestructura médica de primer nivel con sala de partos.",
+                location_name="Distrito 3, Zona Lajastambo",
+                latitude=-19.0065,
+                longitude=-65.2890,
                 budget_allocated=2400000.00,
                 funding_source="Tesoro General de la Nación (TGN)",
                 start_date_planned=date(2026, 2, 1),
@@ -232,6 +232,112 @@ def seed():
                 supervisor_reviewed_at=datetime.now(timezone.utc), supervisor_comments="Atraso severo por lluvias e incumplimiento en la provisión de fierro corrugado."
             )
             db.add(r2)
+
+        # 7. Proyecto 3: Casco Histórico Plaza 25 de Mayo (Semáforo Verde - 97%)
+        proj3 = db.query(Project).filter(Project.tenant_id == tenant.id, Project.code == "PRY-2026-CH-03").first()
+        if not proj3:
+            proj3 = Project(
+                tenant_id=tenant.id,
+                strategic_area_id=area_infra.id,
+                responsible_id=users_dict["responsable_proyecto"].id,
+                supervisor_id=users_dict["supervisor_fiscal"].id,
+                code="PRY-2026-CH-03",
+                name="Restauración y Puesta en Valor Casco Histórico - Plaza 25 de Mayo",
+                description="Restauración de aceras patrimoniales, iluminación arquitectónica LED y revitalización urbana.",
+                location_name="Distrito 1, Centro Histórico - Plaza 25 de Mayo",
+                latitude=-19.0483,
+                longitude=-65.2602,
+                budget_allocated=1250000.00,
+                funding_source="Recursos Propios (IDH)",
+                start_date_planned=date(2026, 1, 5),
+                end_date_planned=date(2026, 9, 15),
+                status="in_execution",
+                baseline_frozen_at=datetime.now(timezone.utc)
+            )
+            db.add(proj3)
+            db.flush()
+
+            c3_1 = ProjectComponent(tenant_id=tenant.id, project_id=proj3.id, code="C-01", name="Tratamiento de aceras y fachadas patrimoniales", weight_percentage=60.0, order_index=1)
+            c3_2 = ProjectComponent(tenant_id=tenant.id, project_id=proj3.id, code="C-02", name="Iluminación escénica y cableado subterráneo", weight_percentage=40.0, order_index=2)
+            db.add_all([c3_1, c3_2])
+            db.flush()
+
+            a3_1 = ProjectActivity(
+                tenant_id=tenant.id, component_id=c3_1.id, code="ACT-01.01",
+                name="Desmontaje de baldosas y reposición de pavimento colonial", unit_of_measure="m2",
+                total_target_quantity=1800.0, weight_percentage=100.0,
+                start_date=date(2026, 1, 10), end_date=date(2026, 4, 30), order_index=1
+            )
+            db.add(a3_1)
+            db.flush()
+
+            db.add(ActivityPlannedPeriod(tenant_id=tenant.id, activity_id=a3_1.id, period_date=date(2026, 1, 1), planned_quantity=600.0, planned_budget=200000.0))
+            r3 = ActivityProgressReport(
+                tenant_id=tenant.id, activity_id=a3_1.id, period_date=date(2026, 1, 1),
+                quantity_executed=580.0, reported_by_id=users_dict["responsable_proyecto"].id,
+                supervisor_status="approved", supervisor_id=users_dict["supervisor_fiscal"].id,
+                supervisor_reviewed_at=datetime.now(timezone.utc), supervisor_comments="Alineamiento y cantería colonial en perfecto estado según catálogo patrimonial."
+            )
+            db.add(r3)
+            db.flush()
+
+            ev3 = ProgressEvidence(
+                tenant_id=tenant.id, report_id=r3.id,
+                file_name="restauracion_plaza_25_mayo.jpg",
+                file_url="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=800",
+                file_type="image/jpeg", file_size_bytes=1900000,
+                latitude=-19.0483, longitude=-65.2602,
+                captured_at=datetime.now(timezone.utc),
+                description="Trabajos de calzada y acera patrimonial frente a la Casa de la Libertad"
+            )
+            db.add(ev3)
+
+        # 8. Proyecto 4: UE San Juanillo (Semáforo Amarillo - 77%)
+        proj4 = db.query(Project).filter(Project.tenant_id == tenant.id, Project.code == "PRY-2026-ED-04").first()
+        if not proj4:
+            proj4 = Project(
+                tenant_id=tenant.id,
+                strategic_area_id=area_humano.id,
+                responsible_id=users_dict["responsable_proyecto"].id,
+                supervisor_id=users_dict["supervisor_fiscal"].id,
+                code="PRY-2026-ED-04",
+                name="Construcción Módulos Aulas y Coliseo Unidad Educativa San Juanillo",
+                description="Infraestructura educativa de 8 aulas modernas, batería sanitaria y tinglado polideportivo.",
+                location_name="Distrito 5, Barrio San Juanillo",
+                latitude=-19.0345,
+                longitude=-65.2490,
+                budget_allocated=1890000.00,
+                funding_source="Recursos Específicos Municipales",
+                start_date_planned=date(2026, 2, 10),
+                end_date_planned=date(2026, 10, 20),
+                status="in_execution",
+                baseline_frozen_at=datetime.now(timezone.utc)
+            )
+            db.add(proj4)
+            db.flush()
+
+            c4_1 = ProjectComponent(tenant_id=tenant.id, project_id=proj4.id, code="C-01", name="Bloque pedagógico de dos plantas", weight_percentage=60.0, order_index=1)
+            c4_2 = ProjectComponent(tenant_id=tenant.id, project_id=proj4.id, code="C-02", name="Cubierta metálica tinglado y graderías", weight_percentage=40.0, order_index=2)
+            db.add_all([c4_1, c4_2])
+            db.flush()
+
+            a4_1 = ProjectActivity(
+                tenant_id=tenant.id, component_id=c4_1.id, code="ACT-01.01",
+                name="Estructuras de hormigón armado y zapatas aisladas", unit_of_measure="m3",
+                total_target_quantity=220.0, weight_percentage=100.0,
+                start_date=date(2026, 2, 15), end_date=date(2026, 5, 30), order_index=1
+            )
+            db.add(a4_1)
+            db.flush()
+
+            db.add(ActivityPlannedPeriod(tenant_id=tenant.id, activity_id=a4_1.id, period_date=date(2026, 2, 1), planned_quantity=80.0, planned_budget=250000.0))
+            r4 = ActivityProgressReport(
+                tenant_id=tenant.id, activity_id=a4_1.id, period_date=date(2026, 2, 1),
+                quantity_executed=62.0, reported_by_id=users_dict["responsable_proyecto"].id,
+                supervisor_status="approved", supervisor_id=users_dict["supervisor_fiscal"].id,
+                supervisor_reviewed_at=datetime.now(timezone.utc), supervisor_comments="Ligero retraso en armado de encofrados por abastecimiento de madera."
+            )
+            db.add(r4)
 
         db.commit()
         print("\n ¡Datos Semilla insertados exitosamente!")

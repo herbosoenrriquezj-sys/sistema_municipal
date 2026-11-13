@@ -73,8 +73,8 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
             file_url: photoUrl,
             file_type: 'image/jpeg',
             file_size_bytes: 1450000,
-            latitude: -17.3935,
-            longitude: -66.1570,
+            latitude: -19.0280,
+            longitude: -65.2630,
             captured_at: new Date().toISOString(),
             description: evidenceDescription,
           },
@@ -265,7 +265,7 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
 
                 <div className="flex items-center space-x-2 text-xs text-slate-500 bg-white p-2.5 rounded-xl border border-slate-200">
                   <MapPin className="w-4 h-4 text-rose-500 flex-shrink-0" />
-                  <span>GPS: <strong>-17.3935, -66.1570</strong> (Distrito 4, OTB Los Álamos)</span>
+                  <span>GPS: <strong>-19.0280, -65.2630</strong> (Distrito 2, Sucre - Chuquisaca)</span>
                 </div>
               </div>
 

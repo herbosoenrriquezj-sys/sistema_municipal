@@ -62,7 +62,7 @@ export const App: React.FC = () => {
         setCurrentTab={setCurrentTab}
         currentRole={currentRole}
         setCurrentRole={setCurrentRole}
-        tenantName={summary?.institution_name || 'Gobierno Autónomo Municipal'}
+        tenantName={summary?.institution_name || 'Gobierno Autónomo Municipal de Sucre'}
       />
 
       {/* Contenedor Principal */}

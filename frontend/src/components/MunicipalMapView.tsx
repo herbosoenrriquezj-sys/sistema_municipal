@@ -49,10 +49,10 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
     return { real: 0, planned: 0 };
   };
 
-  // Coordenadas válidas
+  // Coordenadas válidas (Centro Sucre por defecto: -19.0380, -65.2580)
   const georeferencedProjects = projects.map((p) => {
-    const lat = p.latitude || -17.3935;
-    const lng = p.longitude || -66.1570;
+    const lat = p.latitude || -19.0380;
+    const lng = p.longitude || -65.2580;
     const trafficLight = getProjectTrafficLight(p.id);
     const progress = getProjectProgress(p.id);
     return {
@@ -76,8 +76,8 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
-      // Inicializar mapa centrado en el municipio
-      const initialCenter: [number, number] = [-17.3980, -66.1520];
+      // Inicializar mapa centrado en el municipio (Sucre, Chuquisaca)
+      const initialCenter: [number, number] = [-19.0380, -65.2580];
       const map = L.map(mapContainerRef.current, {
         center: initialCenter,
         zoom: 13,
@@ -353,3 +353,4 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
     </div>
   );
 };
+
