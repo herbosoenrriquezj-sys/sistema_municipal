@@ -8,11 +8,13 @@ import { ExecutiveSummary } from '../types';
 interface ExecutiveDashboardProps {
   summary: ExecutiveSummary;
   onSelectProject: (projectId: string) => void;
+  onNavigateToReport?: () => void;
 }
 
 export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
   summary,
   onSelectProject,
+  onNavigateToReport,
 }) => {
   const getTrafficLightBadge = (color: 'green' | 'yellow' | 'red') => {
     switch (color) {
@@ -63,11 +65,11 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
 
           <div className="flex items-center space-x-3">
             <button
-              onClick={() => window.print()}
+              onClick={() => onNavigateToReport ? onNavigateToReport() : window.print()}
               className="inline-flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-white/20 transition-all shadow-sm"
             >
               <Download className="w-4 h-4" />
-              <span>Exportar Informe PDF</span>
+              <span>Ver Informe Oficial Imprimible</span>
             </button>
           </div>
         </div>

@@ -1,10 +1,12 @@
 from typing import List, Dict, Any
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.api.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.strategic import StrategicArea
 from app.models.project import Project
+from app.models.change_control import ReprogrammingRequest
 from app.services.calculation import calculate_area_progress, calculate_project_progress, get_traffic_light
 
 router = APIRouter(prefix="/dashboard", tags=["Tablero Ejecutivo Alcalde / Directores"])
@@ -71,4 +73,66 @@ def get_executive_summary(
         "critical_projects_count": len(critical_projects),
         "critical_projects": critical_projects
     }
+
+@router.get("/official-report")
+def get_official_report_data(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """
+    Retorna los datos estructurados para el Informe Oficial de Rendición de Cuentas (Módulo 4.6).
+    """
+    exec_summary = get_executive_summary(db, current_user)
+    
+    projects = db.query(Project).filter(
+        Project.tenant_id == current_user.tenant_id
+    ).order_by(Project.code).all()
+
+    projects_detailed = []
+    total_budget = 0.0
+
+    for p in projects:
+        prog = calculate_project_progress(p.id, db)
+        budget = float(p.budget_allocated)
+        total_budget += budget
+        
+        last_reprog = db.query(ReprogrammingRequest).filter(
+            ReprogrammingRequest.project_id == p.id,
+            ReprogrammingRequest.status == "approved"
+        ).order_by(ReprogrammingRequest.created_at.desc()).first()
+
+        projects_detailed.append({
+            "code": p.code,
+            "name": p.name,
+            "area_name": p.strategic_area.name if p.strategic_area else "General",
+            "budget": budget,
+            "start_date": str(p.start_date_planned),
+            "end_date": str(p.end_date_planned),
+            "status": p.status,
+            "baseline_version": len(p.baselines) if p.baselines else 1,
+            "real_progress_pct": prog.get("real_progress_pct", 0.0),
+            "planned_progress_pct": prog.get("planned_progress_pct", 0.0),
+            "compliance_index": prog.get("compliance_index", 1.0),
+            "traffic_light": prog.get("traffic_light", "green"),
+            "variance_reason": last_reprog.cause_category if last_reprog else ("Desvío operativo en campo" if prog.get("traffic_light") == "red" else "En ruta normal"),
+            "variance_justification": last_reprog.justification if last_reprog else ""
+        })
+
+    return {
+        "report_code": f"INF-TEC-{datetime.now().year}-001",
+        "generated_at": datetime.now(timezone.utc).strftime("%d/%m/%Y %H:%M"),
+        "institution_name": current_user.tenant.name if current_user.tenant else "Gobierno Autónomo Municipal",
+        "department_state": current_user.tenant.department_state if current_user.tenant else "Cochabamba",
+        "evaluated_period": f"Gestión Fiscal {datetime.now().year} - Ejecución Física Acumulada",
+        "summary": exec_summary,
+        "total_budget": round(total_budget, 2),
+        "projects_detailed": projects_detailed,
+        "signers": [
+            {"title": "Residente de Obra", "name": "Arq. Carlos Méndez", "sub": "Responsable Técnico de Ejecución"},
+            {"title": "Supervisor / Fiscal", "name": "Ing. Laura Vargas", "sub": "Fiscal de Obras Públicas"},
+            {"title": "Director de Obras", "name": "Ing. Roberto Fernández", "sub": "Secretaría Municipal de Obras"},
+            {"title": "Alcalde Municipal", "name": "Alcalde Municipal", "sub": "Máxima Autoridad Ejecutiva (M.A.E.)"}
+        ]
+    }
+
 

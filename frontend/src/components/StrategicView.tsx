@@ -369,3 +369,4 @@ export const StrategicView: React.FC<StrategicViewProps> = ({ onSelectProject })
     </div>
   );
 };
+

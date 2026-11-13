@@ -4,6 +4,7 @@ import { ExecutiveDashboard } from './components/ExecutiveDashboard';
 import { ProjectsView } from './components/ProjectsView';
 import { FieldReportingView } from './components/FieldReportingView';
 import { StrategicView } from './components/StrategicView';
+import { OfficialReportView } from './components/OfficialReportView';
 import { dashboardService, projectService, authService } from './services/api';
 import { ExecutiveSummary, Project } from './types';
 import { Loader2, RefreshCw } from 'lucide-react';
@@ -68,6 +69,7 @@ export const App: React.FC = () => {
               <ExecutiveDashboard
                 summary={summary}
                 onSelectProject={handleSelectProject}
+                onNavigateToReport={() => setCurrentTab('report')}
               />
             )}
 
@@ -90,6 +92,12 @@ export const App: React.FC = () => {
             {currentTab === 'strategic' && (
               <StrategicView
                 onSelectProject={handleSelectProject}
+              />
+            )}
+
+            {currentTab === 'report' && (
+              <OfficialReportView
+                onBack={() => setCurrentTab('dashboard')}
               />
             )}
           </>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, ShieldCheck, Activity, Smartphone, Layers, Users, Compass } from 'lucide-react';
+import { Building2, ShieldCheck, Activity, Smartphone, Layers, Users, Compass, FileText } from 'lucide-react';
 
 interface NavbarProps {
   currentTab: string;
@@ -94,6 +94,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Compass className="w-4 h-4 text-indigo-600" />
               <span>Planificación & POA</span>
             </button>
+
+            <button
+              onClick={() => setCurrentTab('report')}
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                currentTab === 'report'
+                  ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <FileText className="w-4 h-4 text-slate-700" />
+              <span>Reporte Oficial</span>
+            </button>
           </nav>
 
           {/* Selector de Rol Demostrativo */}
@@ -152,6 +164,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <Compass className="w-5 h-5 mb-0.5" />
           POA
+        </button>
+        <button
+          onClick={() => setCurrentTab('report')}
+          className={`flex flex-col items-center text-xs font-semibold ${
+            currentTab === 'report' ? 'text-sky-600' : 'text-slate-500'
+          }`}
+        >
+          <FileText className="w-5 h-5 mb-0.5" />
+          Reporte
         </button>
       </div>
     </header>

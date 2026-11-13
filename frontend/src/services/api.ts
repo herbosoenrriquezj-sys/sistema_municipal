@@ -143,6 +143,15 @@ export const dashboardService = {
         ]
       };
     }
+  },
+
+  getOfficialReport: async () => {
+    try {
+      const res = await api.get('/dashboard/official-report');
+      return res.data;
+    } catch {
+      return null;
+    }
   }
 };
 
