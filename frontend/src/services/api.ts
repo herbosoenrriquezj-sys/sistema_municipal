@@ -156,8 +156,28 @@ export const projectService = {
     }
   },
 
+  createProject: async (data: any) => {
+    const res = await api.post('/projects', data);
+    return res.data;
+  },
+
   freezeBaseline: async (projectId: string) => {
     const res = await api.post(`/projects/${projectId}/freeze-baseline`);
+    return res.data;
+  },
+
+  requestReprogramming: async (projectId: string, data: { cause_category: string; justification: string; requested_days_extension: number }) => {
+    const res = await api.post(`/projects/${projectId}/reprogramming`, data);
+    return res.data;
+  },
+
+  getReprogrammings: async (projectId: string) => {
+    const res = await api.get(`/projects/${projectId}/reprogramming`);
+    return res.data;
+  },
+
+  reviewReprogramming: async (requestId: string, decision: 'approved' | 'rejected', review_notes: string) => {
+    const res = await api.post(`/projects/reprogramming/${requestId}/review`, { decision, review_notes });
     return res.data;
   }
 };
@@ -166,6 +186,15 @@ export const trackingService = {
   submitReport: async (data: any) => {
     const res = await api.post('/tracking/reports', data);
     return res.data;
+  },
+
+  getPendingReports: async () => {
+    try {
+      const res = await api.get('/tracking/reports/pending');
+      return res.data;
+    } catch {
+      return [];
+    }
   },
 
   validateReport: async (reportId: string, status: string, comments: string) => {

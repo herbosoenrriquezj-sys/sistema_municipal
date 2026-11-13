@@ -108,3 +108,4 @@ npm run dev
 ## 📄 Licencia y Créditos
 Desarrollado para el **Proyecto de Grado en Ingeniería de Sistemas de Información (ISI)**.
 Propuesta de modelo SaaS para Gobiernos Autónomos Municipales.
+

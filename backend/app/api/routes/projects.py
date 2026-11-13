@@ -1,15 +1,16 @@
 from typing import List, Optional
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.api.deps import get_db, get_current_user
 from app.models.user import User
 from app.models.project import Project, ProjectComponent, ProjectActivity, ActivityPlannedPeriod
-from app.models.change_control import ProjectBaseline
+from app.models.change_control import ProjectBaseline, ReprogrammingRequest
 from app.schemas.project import (
     ProjectCreate, ProjectResponse,
     ProjectComponentCreate, ProjectComponentResponse,
-    ProjectActivityCreate, ProjectActivityResponse
+    ProjectActivityCreate, ProjectActivityResponse,
+    ReprogrammingRequestCreate, ReprogrammingReviewRequest, ReprogrammingResponse
 )
 from app.services.calculation import calculate_project_progress
 
@@ -184,4 +185,106 @@ def freeze_project_baseline(
         "version": version,
         "frozen_at": project.baseline_frozen_at
     }
+
+@router.post("/{project_id}/reprogramming", response_model=ReprogrammingResponse, status_code=status.HTTP_201_CREATED)
+def request_reprogramming(
+    project_id: str,
+    req_in: ReprogrammingRequestCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Registra una solicitud formal de reprogramación y causa obligatoria de desvío (Módulo 4.4).
+    """
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.tenant_id == current_user.tenant_id
+    ).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+
+    new_request = ReprogrammingRequest(
+        tenant_id=current_user.tenant_id,
+        project_id=project.id,
+        cause_category=req_in.cause_category,
+        justification=req_in.justification,
+        requested_days_extension=req_in.requested_days_extension,
+        status="pending",
+        requested_by_id=current_user.id
+    )
+    db.add(new_request)
+    db.commit()
+    db.refresh(new_request)
+    return new_request
+
+@router.get("/{project_id}/reprogramming", response_model=List[ReprogrammingResponse])
+def list_project_reprogrammings(
+    project_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Historial de solicitudes de reprogramación del proyecto.
+    """
+    return db.query(ReprogrammingRequest).filter(
+        ReprogrammingRequest.project_id == project_id,
+        ReprogrammingRequest.tenant_id == current_user.tenant_id
+    ).order_by(ReprogrammingRequest.created_at.desc()).all()
+
+@router.post("/reprogramming/{request_id}/review")
+def review_reprogramming(
+    request_id: str,
+    review_in: ReprogrammingReviewRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    El Alcalde o Director de Área aprueba o rechaza la reprogramación.
+    Si aprueba, se genera una nueva versión oficial de Línea Base (v2, v3...).
+    """
+    reprog = db.query(ReprogrammingRequest).filter(
+        ReprogrammingRequest.id == request_id,
+        ReprogrammingRequest.tenant_id == current_user.tenant_id
+    ).first()
+    if not reprog:
+        raise HTTPException(status_code=404, detail="Solicitud no encontrada")
+
+    reprog.status = review_in.decision
+    reprog.review_notes = review_in.review_notes
+    reprog.reviewed_by_id = current_user.id
+    reprog.reviewed_at = datetime.now(timezone.utc)
+
+    if review_in.decision == "approved":
+        project = reprog.project
+        if reprog.requested_days_extension > 0:
+            project.end_date_planned = project.end_date_planned + timedelta(days=reprog.requested_days_extension)
+
+        # Desactivar líneas previas
+        db.query(ProjectBaseline).filter(
+            ProjectBaseline.project_id == project.id
+        ).update({"is_active": False})
+
+        version = db.query(ProjectBaseline).filter(ProjectBaseline.project_id == project.id).count() + 1
+
+        new_baseline = ProjectBaseline(
+            tenant_id=current_user.tenant_id,
+            project_id=project.id,
+            version_number=version,
+            snapshot_data={
+                "frozen_at": datetime.now(timezone.utc).isoformat(),
+                "budget_allocated": float(project.budget_allocated),
+                "end_date_planned": str(project.end_date_planned),
+                "reason": f"Reprogramación aprobada: {reprog.cause_category}. {reprog.justification}"
+            },
+            is_active=True,
+            approved_by_id=current_user.id
+        )
+        db.add(new_baseline)
+
+    db.commit()
+    return {
+        "status": reprog.status,
+        "message": f"Solicitud de reprogramación {reprog.status} exitosamente."
+    }
+
 

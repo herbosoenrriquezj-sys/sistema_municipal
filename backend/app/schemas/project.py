@@ -86,3 +86,28 @@ class ProjectResponse(ProjectBase):
     class Config:
         from_attributes = True
 
+class ReprogrammingRequestCreate(BaseModel):
+    cause_category: str  # climatic_factors, contractor_delay, lack_of_budget, scope_change, social_conflict, other
+    justification: str
+    requested_days_extension: int = 0
+
+class ReprogrammingReviewRequest(BaseModel):
+    decision: str  # approved, rejected
+    review_notes: Optional[str] = None
+
+class ReprogrammingResponse(BaseModel):
+    id: str
+    project_id: str
+    cause_category: str
+    justification: str
+    requested_days_extension: int
+    status: str
+    requested_by_id: str
+    reviewed_by_id: Optional[str] = None
+    review_notes: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
