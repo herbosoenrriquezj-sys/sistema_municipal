@@ -5,6 +5,7 @@ import { ProjectsView } from './components/ProjectsView';
 import { FieldReportingView } from './components/FieldReportingView';
 import { StrategicView } from './components/StrategicView';
 import { OfficialReportView } from './components/OfficialReportView';
+import { MunicipalMapView } from './components/MunicipalMapView';
 import { dashboardService, projectService, authService } from './services/api';
 import { ExecutiveSummary, Project } from './types';
 import { Loader2, RefreshCw } from 'lucide-react';
@@ -101,6 +102,14 @@ export const App: React.FC = () => {
 
             {currentTab === 'strategic' && (
               <StrategicView
+                onSelectProject={handleSelectProject}
+              />
+            )}
+
+            {currentTab === 'map' && (
+              <MunicipalMapView
+                projects={projects}
+                summary={summary}
                 onSelectProject={handleSelectProject}
               />
             )}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, ShieldCheck, Activity, Smartphone, Layers, Users, Compass, FileText } from 'lucide-react';
+import { Building2, ShieldCheck, Activity, Smartphone, Layers, Users, Compass, FileText, MapPin } from 'lucide-react';
 
 interface NavbarProps {
   currentTab: string;
@@ -96,6 +96,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <button
+              onClick={() => setCurrentTab('map')}
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                currentTab === 'map'
+                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <MapPin className="w-4 h-4 text-emerald-600" />
+              <span>Mapa GIS</span>
+            </button>
+
+            <button
               onClick={() => setCurrentTab('report')}
               className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all ${
                 currentTab === 'report'
@@ -164,6 +176,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <Compass className="w-5 h-5 mb-0.5" />
           POA
+        </button>
+        <button
+          onClick={() => setCurrentTab('map')}
+          className={`flex flex-col items-center text-xs font-semibold ${
+            currentTab === 'map' ? 'text-emerald-600' : 'text-slate-500'
+          }`}
+        >
+          <MapPin className="w-5 h-5 mb-0.5" />
+          Mapa
         </button>
         <button
           onClick={() => setCurrentTab('report')}

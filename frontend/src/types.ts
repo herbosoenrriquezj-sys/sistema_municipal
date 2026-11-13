@@ -78,6 +78,8 @@ export interface Project {
   name: string;
   description: string;
   location_name: string;
+  latitude?: number | null;
+  longitude?: number | null;
   budget_allocated: number;
   funding_source: string;
   start_date_planned: string;

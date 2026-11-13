@@ -197,6 +197,8 @@ def seed():
                 name="Construcción Centro de Salud Integral Comunitario",
                 description="Construcción de infraestructura médica de 2 plantas con sala de partos.",
                 location_name="Distrito 8, Zona San Juan",
+                latitude=-17.4080,
+                longitude=-66.1420,
                 budget_allocated=2400000.00,
                 funding_source="Tesoro General de la Nación (TGN)",
                 start_date_planned=date(2026, 2, 1),
