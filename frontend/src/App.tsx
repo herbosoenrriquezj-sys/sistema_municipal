@@ -108,10 +108,10 @@ export const App: React.FC = () => {
       <footer className="bg-white border-t border-slate-200 py-6 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
           <p>
-            <strong>SGP Municipal SaaS</strong> · Sistema de Gerencia de Proyectos y Planificación Estratégica.
+            <strong>SGP Municipal SaaS</strong> · Plataforma Integral de Gerencia de Proyectos y Planificación Estratégica.
           </p>
           <p className="text-slate-400">
-            Ingeniería en Sistemas de Información (ISI) · Proyecto de Grado 2026
+            Solución GovTech en la Nube para Gobiernos Autónomos Municipales · Todos los derechos reservados © {new Date().getFullYear()}
           </p>
         </div>
       </footer>

@@ -105,7 +105,7 @@ npm run dev
 
 ---
 
-## 📄 Licencia y Créditos
-Desarrollado para el **Proyecto de Grado en Ingeniería de Sistemas de Información (ISI)**.
-Propuesta de modelo SaaS para Gobiernos Autónomos Municipales.
+## 📄 Licencia y Modelo Comercial
+**SGP Municipal SaaS** es una solución de software empresarial (GovTech B2G) desarrollada para comercializarse como servicio en la nube (SaaS) a Gobiernos Autónomos Municipales, Departamentales y Entidades Públicas Descentralizadas.
+Todos los derechos reservados.
 
