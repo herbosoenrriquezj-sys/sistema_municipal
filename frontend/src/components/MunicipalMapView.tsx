@@ -3,7 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { 
   MapPin, Navigation, Eye, CheckCircle2, AlertTriangle, 
-  Layers, Search, Filter, ExternalLink, Building2
+  Layers, Search, Filter, ExternalLink, Building2, Globe, Camera
 } from 'lucide-react';
 import { Project, ExecutiveSummary } from '../types';
 
@@ -21,7 +21,9 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<{ [key: string]: L.Marker }>({});
+  const currentTileLayerRef = useRef<L.TileLayer | null>(null);
 
+  const [mapLayerType, setMapLayerType] = useState<'google-hybrid' | 'google-streets' | 'google-terrain' | 'osm'>('google-hybrid');
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'green' | 'yellow' | 'red'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeProject, setActiveProject] = useState<any | null>(null);
@@ -84,14 +86,48 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
         zoomControl: true,
       });
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors | SGP Municipal GIS',
-        maxZoom: 19,
+      // Capa inicial: Google Satélite Híbrido HD
+      const defaultLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        attribution: '&copy; Google Maps Satelital HD | SGP Municipal GIS',
+        maxZoom: 20,
       }).addTo(map);
 
+      currentTileLayerRef.current = defaultLayer;
       mapInstanceRef.current = map;
     }
+  }, []);
 
+  // Efecto para alternar entre capas satelitales de Google Maps y OpenStreetMap
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+
+    if (currentTileLayerRef.current) {
+      map.removeLayer(currentTileLayerRef.current);
+    }
+
+    let url = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
+    let attribution = '&copy; Google Maps Satélite HD | SGP Municipal GIS';
+    let maxZoom = 20;
+
+    if (mapLayerType === 'google-streets') {
+      url = 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
+      attribution = '&copy; Google Maps Calles | SGP Municipal GIS';
+    } else if (mapLayerType === 'google-terrain') {
+      url = 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}';
+      attribution = '&copy; Google Maps Relieve Topográfico | SGP Municipal GIS';
+    } else if (mapLayerType === 'osm') {
+      url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      attribution = '&copy; OpenStreetMap contributors | SGP Municipal GIS';
+      maxZoom = 19;
+    }
+
+    const newLayer = L.tileLayer(url, { attribution, maxZoom }).addTo(map);
+    currentTileLayerRef.current = newLayer;
+  }, [mapLayerType]);
+
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
     const map = mapInstanceRef.current;
 
     // Limpiar marcadores previos
@@ -118,15 +154,23 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
 
       const marker = L.marker([p.lat, p.lng], { icon: customIcon }).addTo(map);
 
-      // Popup
+      // Popup enriquecido con acceso directo a Google Maps y Street View 360°
       const popupHtml = `
-        <div style="font-family: system-ui, sans-serif; padding: 4px; min-width: 200px;">
+        <div style="font-family: system-ui, sans-serif; padding: 4px; min-width: 220px;">
           <span style="font-family: monospace; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">${p.code}</span>
           <h4 style="font-size: 13px; font-weight: 800; color: #0f172a; margin: 2px 0 6px 0;">${p.name}</h4>
           <p style="font-size: 11px; color: #475569; margin: 0 0 6px 0;">📍 ${p.location_name || 'Ubicación municipal'}</p>
           <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; margin-bottom: 8px;">
             <span>Avance Real:</span>
             <span style="color: ${colorBg};">${p.progress.real}% / ${p.progress.planned}%</span>
+          </div>
+          <div style="display: flex; gap: 4px; border-top: 1px solid #e2e8f0; padding-top: 6px;">
+            <a href="https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}" target="_blank" rel="noopener noreferrer" style="flex: 1; text-align: center; background: #0284c7; color: white; padding: 4px 6px; border-radius: 6px; text-decoration: none; font-size: 10px; font-weight: 700;">
+              Google Maps
+            </a>
+            <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${p.lat},${p.lng}" target="_blank" rel="noopener noreferrer" style="flex: 1; text-align: center; background: #475569; color: white; padding: 4px 6px; border-radius: 6px; text-decoration: none; font-size: 10px; font-weight: 700;">
+              Street View 360°
+            </a>
           </div>
         </div>
       `;
@@ -296,9 +340,45 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
           </div>
         </div>
 
-        {/* Mapa Interactivo (Leaflet) */}
+        {/* Mapa Interactivo con Capas Satelitales de Google */}
         <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden relative h-full">
           <div ref={mapContainerRef} className="w-full h-full z-0"></div>
+
+          {/* Selector flotante de Capas Google Maps */}
+          <div className="absolute top-4 right-4 z-20 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-lg border border-slate-200 flex flex-wrap items-center gap-1 text-xs">
+            <button
+              onClick={() => setMapLayerType('google-hybrid')}
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1 ${
+                mapLayerType === 'google-hybrid' ? 'bg-sky-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span>🛰️ Google Satélite</span>
+            </button>
+            <button
+              onClick={() => setMapLayerType('google-streets')}
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1 ${
+                mapLayerType === 'google-streets' ? 'bg-sky-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span>🗺️ Calles</span>
+            </button>
+            <button
+              onClick={() => setMapLayerType('google-terrain')}
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1 ${
+                mapLayerType === 'google-terrain' ? 'bg-sky-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span>⛰️ Relieve</span>
+            </button>
+            <button
+              onClick={() => setMapLayerType('osm')}
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1 ${
+                mapLayerType === 'osm' ? 'bg-sky-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <span>OSM</span>
+            </button>
+          </div>
 
           {/* Tarjeta Flotante al Seleccionar Obra */}
           {activeProject && (
@@ -337,6 +417,28 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
                     {activeProject.progress.real}% <span className="text-slate-400 font-normal">/ {activeProject.progress.planned}%</span>
                   </span>
                 </div>
+              </div>
+
+              {/* Botones de Navegación Google Maps y Street View 360° */}
+              <div className="flex gap-2">
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${activeProject.lat},${activeProject.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center space-x-1 border border-slate-300 transition-all"
+                >
+                  <Navigation className="w-3.5 h-3.5 text-sky-600" />
+                  <span>Google Maps GPS</span>
+                </a>
+                <a
+                  href={`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${activeProject.lat},${activeProject.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center space-x-1 border border-slate-300 transition-all"
+                >
+                  <Camera className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Street View 360°</span>
+                </a>
               </div>
 
               <button
