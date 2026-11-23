@@ -28,3 +28,4 @@ class CitizenInquiry(Base):
     tenant = relationship("Tenant")
     project = relationship("Project")
     responded_by = relationship("User")
+

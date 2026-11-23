@@ -1,7 +1,8 @@
 import React from 'react';
 import { 
-  TrendingUp, AlertTriangle, CheckCircle2, Clock, 
-  BarChart3, FolderKanban, ShieldAlert, ArrowUpRight, ChevronRight, FileSpreadsheet, Download
+  TrendingUp, AlertTriangle, Clock, 
+  BarChart3, ShieldAlert, ChevronRight, FileSpreadsheet, Download,
+  Layers, ArrowUpRight
 } from 'lucide-react';
 import { ExecutiveSummary } from '../types';
 
@@ -20,23 +21,23 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
     switch (color) {
       case 'green':
         return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>
             EN RUTA (≥90%)
           </span>
         );
       case 'yellow':
         return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
-            <span className="w-2 h-2 rounded-full bg-amber-500 mr-1.5"></span>
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-600 mr-1.5"></span>
             EN RIESGO (70-89%)
           </span>
         );
       case 'red':
         return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
-            <span className="w-2 h-2 rounded-full bg-rose-600 mr-1.5 animate-ping"></span>
-            DESVÍO CRÍTICO (&lt;70%)
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 text-rose-800 border border-rose-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-600 mr-1.5"></span>
+            DESVÍO (&lt;70%)
           </span>
         );
       default:
@@ -79,208 +80,200 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `SGP_Reporte_Ejecucion_Fisica_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `SGP_Sucre_Ejecucion_Fisica_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Banner Superior Institucional */}
-      <div className="bg-gradient-to-r from-slate-900 via-sky-950 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 -mt-12 -mr-12 w-80 h-80 rounded-full bg-sky-500/10 blur-3xl pointer-events-none"></div>
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center space-x-2 text-sky-400 text-xs font-bold tracking-widest uppercase mb-2">
-              <BarChart3 className="w-4 h-4" />
-              <span>Despacho del Alcalde · Gestión y Control Estratégico</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Tablero General de Ejecución Física
-            </h1>
-            <p className="text-slate-300 text-sm mt-1 max-w-2xl">
-              Monitoreo en tiempo real del cumplimiento de obras y proyectos, articulado con el Plan Territorial (PTDI) y POA municipal.
-            </p>
+    <div className="space-y-6 animate-fadeIn">
+      {/* 1. Encabezado Ejecutivo Institucional */}
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <span className="text-[10px] sm:text-xs font-mono font-bold uppercase text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+              Despacho de Alcaldía
+            </span>
+            <span className="text-slate-300">·</span>
+            <span className="text-xs font-semibold text-slate-500">Gestión Fiscal 2026</span>
           </div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            Tablero de Ejecución Física e Inversión Pública
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
+            Seguimiento de obras en tiempo real articuladas con el Plan Territorial (PTDI) y POA municipal.
+          </p>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              onClick={handleExportExcel}
-              className="inline-flex items-center space-x-2 bg-emerald-600/90 hover:bg-emerald-600 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl border border-emerald-500 transition-all shadow-sm"
-              title="Descargar matriz en Excel para remisión al Concejo y Planificación"
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-              <span>Exportar Excel (CSV)</span>
-            </button>
+        {/* Acciones de Exportación y Reporte */}
+        <div className="flex items-center gap-2 self-start md:self-auto flex-shrink-0">
+          <button
+            onClick={handleExportExcel}
+            className="inline-flex items-center space-x-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold px-3 py-2 rounded-lg border border-slate-300 transition-colors shadow-2xs"
+            title="Descargar matriz en Excel (.csv)"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span className="hidden sm:inline">Exportar Excel</span>
+            <span className="sm:hidden">Excel</span>
+          </button>
 
-            <button
-              onClick={() => onNavigateToReport ? onNavigateToReport() : window.print()}
-              className="inline-flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-white/20 transition-all shadow-sm"
-            >
-              <Download className="w-4 h-4" />
-              <span>Informe Imprimible</span>
-            </button>
-          </div>
+          <button
+            onClick={() => onNavigateToReport ? onNavigateToReport() : window.print()}
+            className="inline-flex items-center space-x-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition-colors shadow-2xs"
+          >
+            <Download className="w-3.5 h-3.5 text-sky-400" />
+            <span>Informe Oficial</span>
+          </button>
         </div>
       </div>
 
-      {/* Tarjetas KPIs Globales */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Avance Real Ponderado */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Avance Real Global</span>
-            <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
-              <TrendingUp className="w-5 h-5" />
+      {/* 2. Tarjetas KPIs Principales */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* KPI 1: Avance Real Global */}
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Avance Físico Real</span>
+            <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-700 flex items-center justify-center font-bold">
+              <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-3xl sm:text-4xl font-extrabold text-slate-900">
+          <div className="my-2">
+            <div className="text-2xl sm:text-3xl font-black font-mono text-slate-900">
               {summary.global_real_progress_pct}%
-            </span>
-            <span className="text-xs font-medium text-slate-500">
-              de meta física anual
-            </span>
+            </div>
+            <span className="text-[11px] text-slate-400 font-medium">Promedio ponderado municipal</span>
           </div>
-          <div className="mt-3 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
             <div 
-              className="bg-sky-600 h-2 rounded-full transition-all duration-1000"
+              className="bg-sky-600 h-1.5 rounded-full"
               style={{ width: `${Math.min(summary.global_real_progress_pct, 100)}%` }}
             ></div>
           </div>
         </div>
 
-        {/* Avance Programado a la Fecha */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Meta Programada</span>
-            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
-              <Clock className="w-5 h-5" />
+        {/* KPI 2: Meta Programada */}
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Meta Programada</span>
+            <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
+              <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-3xl sm:text-4xl font-extrabold text-slate-900">
+          <div className="my-2">
+            <div className="text-2xl sm:text-3xl font-black font-mono text-slate-700">
               {summary.global_planned_progress_pct}%
-            </span>
-            <span className="text-xs font-medium text-slate-500">esperado al mes</span>
+            </div>
+            <span className="text-[11px] text-slate-400 font-medium">Cronograma contractual a la fecha</span>
           </div>
-          <div className="mt-3 w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
             <div 
-              className="bg-indigo-400 h-2 rounded-full transition-all duration-1000"
+              className="bg-slate-400 h-1.5 rounded-full"
               style={{ width: `${Math.min(summary.global_planned_progress_pct, 100)}%` }}
             ></div>
           </div>
         </div>
 
-        {/* Índice de Cumplimiento & Semáforo */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Índice Cumplimiento</span>
+        {/* KPI 3: Índice de Cumplimiento */}
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Cumplimiento</span>
             {getTrafficLightBadge(summary.global_traffic_light)}
           </div>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-3xl sm:text-4xl font-extrabold text-slate-900">
+          <div className="my-2">
+            <div className="text-2xl sm:text-3xl font-black font-mono text-slate-900">
               {(summary.global_compliance_index * 100).toFixed(0)}%
-            </span>
-            <span className="text-xs font-medium text-slate-500">
-              (Real / Programado)
-            </span>
+            </div>
+            <span className="text-[11px] text-slate-500 font-medium">Relación Real / Planificado</span>
           </div>
-          <p className="mt-3 text-xs text-slate-500">
-            {summary.global_compliance_index >= 0.90 
-              ? 'La gestión global avanza a buen ritmo de cronograma.'
-              : summary.global_compliance_index >= 0.70
-              ? 'Atención: requiere supervisión de desvíos menores.'
-              : 'Alerta: se requiere reprogramación y acciones correctivas.'}
-          </p>
+          <div className="text-[11px] text-slate-500 font-medium truncate">
+            {summary.global_compliance_index >= 0.90 ? 'En ruta óptima' : 'Requiere seguimiento'}
+          </div>
         </div>
 
-        {/* Proyectos Críticos en Alerta */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Obras en Alerta Roja</span>
-            <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
-              <ShieldAlert className="w-5 h-5" />
+        {/* KPI 4: Obras en Alerta Roja */}
+        <div className="bg-white rounded-xl p-4 sm:p-5 border border-rose-200 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">Obras Críticas</span>
+            <div className="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
+              <ShieldAlert className="w-4 h-4" />
             </div>
           </div>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-3xl sm:text-4xl font-extrabold text-rose-600">
+          <div className="my-2">
+            <div className="text-2xl sm:text-3xl font-black font-mono text-rose-700">
               {summary.critical_projects_count}
-            </span>
-            <span className="text-xs font-medium text-slate-500">
-              de {summary.total_projects} obras activas
-            </span>
+            </div>
+            <span className="text-[11px] text-rose-600/80 font-medium">de {summary.total_projects} proyectos</span>
           </div>
-          <p className="mt-3 text-xs text-rose-600 font-semibold flex items-center">
-            <AlertTriangle className="w-3.5 h-3.5 mr-1" />
-            Desvío de cronograma superior al 30%
-          </p>
+          <div className="text-[11px] text-rose-700 font-semibold flex items-center">
+            <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+            Desvío mayor al 30%
+          </div>
         </div>
       </div>
 
-      {/* Desglose por Secretarías / Áreas Estratégicas */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
+      {/* 3. Desglose por Secretarías Municipales */}
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-              Cumplimiento por Secretaría y Área Estratégica
+            <h2 className="text-base font-bold text-slate-900">
+              Ejecución por Secretaría y Área Estratégica
             </h2>
-            <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-              Cálculo ponderado del avance físico a partir de las obras de cada unidad.
+            <p className="text-xs text-slate-500">
+              Ponderación de avances de obras vinculadas a objetivos de desarrollo municipal.
             </p>
           </div>
-          <div className="flex items-center space-x-2 text-xs text-slate-500 font-medium bg-slate-50 py-1.5 px-3 rounded-xl border border-slate-200">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Verde ≥90%
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 ml-2"></span> Amarillo 70-89%
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 ml-2"></span> Rojo &lt;70%
+          <div className="flex items-center space-x-3 text-[11px] font-semibold text-slate-500">
+            <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-emerald-500 mr-1"></span> ≥90%</span>
+            <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-amber-500 mr-1"></span> 70-89%</span>
+            <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-rose-500 mr-1"></span> &lt;70%</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           {summary.areas_summary.map((area) => (
             <div 
               key={area.area_id}
-              className="p-5 rounded-2xl border border-slate-200/80 hover:border-sky-300 hover:shadow-md transition-all bg-gradient-to-br from-white to-slate-50/50"
+              className="p-4 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors bg-slate-50/50"
             >
-              <div className="flex items-start justify-between gap-3 mb-4">
+              <div className="flex items-start justify-between gap-2 mb-3">
                 <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-slate-200 text-slate-700">
                       {area.code}
                     </span>
-                    <span className="text-xs text-slate-500 font-semibold">
-                      Peso Institucional: {area.weight_pct}%
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      Peso: {area.weight_pct}%
                     </span>
                   </div>
-                  <h3 className="font-bold text-base text-slate-900 mt-1">
+                  <h3 className="font-bold text-sm text-slate-900 mt-1">
                     {area.name}
                   </h3>
                 </div>
                 {getTrafficLightBadge(area.traffic_light)}
               </div>
 
-              {/* Barras de comparación: Real vs Programado */}
-              <div className="space-y-2.5 my-4">
+              {/* Comparación: Real vs Programado */}
+              <div className="space-y-2 my-3">
                 <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1">
-                    <span className="text-slate-600">Avance Real Ejecutado</span>
-                    <span className="text-sky-700 font-bold">{area.real_progress_pct}%</span>
+                  <div className="flex justify-between text-xs font-semibold mb-0.5">
+                    <span className="text-slate-600">Avance Real</span>
+                    <span className="font-bold font-mono text-slate-900">{area.real_progress_pct}%</span>
                   </div>
-                  <div className="w-full bg-slate-200/70 rounded-full h-2.5 overflow-hidden">
+                  <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                     <div 
-                      className="bg-sky-600 h-2.5 rounded-full"
+                      className="bg-sky-600 h-2 rounded-full"
                       style={{ width: `${Math.min(area.real_progress_pct, 100)}%` }}
                     ></div>
                   </div>
                 </div>
 
                 <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1">
-                    <span className="text-slate-600">Meta Programada a la Fecha</span>
-                    <span className="text-slate-700">{area.planned_progress_pct}%</span>
+                  <div className="flex justify-between text-xs font-semibold mb-0.5">
+                    <span className="text-slate-500">Programado</span>
+                    <span className="font-mono text-slate-600">{area.planned_progress_pct}%</span>
                   </div>
-                  <div className="w-full bg-slate-200/70 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                     <div 
                       className="bg-slate-400 h-2 rounded-full"
                       style={{ width: `${Math.min(area.planned_progress_pct, 100)}%` }}
@@ -289,9 +282,9 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
-                <span>{area.total_projects} proyecto(s) asignado(s)</span>
-                <span className="font-bold text-slate-700">
+              <div className="pt-2.5 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500 font-medium">
+                <span>{area.total_projects} obra(s) registrada(s)</span>
+                <span className="font-bold text-slate-800">
                   Cumplimiento: {(area.compliance_index * 100).toFixed(0)}%
                 </span>
               </div>
@@ -300,63 +293,62 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
         </div>
       </div>
 
-      {/* Tabla de Proyectos Críticos en Alerta Roja (Reflejo Diapositiva 10) */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-rose-200 shadow-sm">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold">
-            <AlertTriangle className="w-5 h-5" />
+      {/* 4. Obras con Desvío Crítico (Alerta Roja) - Adaptable Desktop / Tablet / Celular */}
+      <div className="bg-white rounded-xl p-4 sm:p-6 border border-rose-200 shadow-xs">
+        <div className="flex items-center space-x-2.5 mb-4 pb-3 border-b border-rose-100">
+          <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center font-bold flex-shrink-0">
+            <AlertTriangle className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
-              Obras con Desvío Crítico (Semáforo Rojo)
+            <h2 className="text-base font-bold text-slate-900">
+              Obras con Desvío Crítico en Ejecución
             </h2>
-            <p className="text-slate-500 text-xs sm:text-sm">
-              Proyectos donde la ejecución física se encuentra por debajo del 70% de lo programado. Requieren justificación o intervención.
+            <p className="text-xs text-slate-500">
+              Proyectos con avance físico inferior al 70% de la programación oficial. Requieren reprogramación justificada.
             </p>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        {/* Vista para Tablet y Desktop (Tabla Tradicional) */}
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50/50">
-                <th className="py-3 px-4">Código / Proyecto</th>
-                <th className="py-3 px-4">Área Estratégica</th>
-                <th className="py-3 px-4">Presupuesto</th>
-                <th className="py-3 px-4 text-center">Real vs Prog.</th>
-                <th className="py-3 px-4 text-center">Cumplimiento</th>
-                <th className="py-3 px-4 text-right">Acción</th>
+              <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider bg-slate-50">
+                <th className="py-2.5 px-3">Código / Proyecto</th>
+                <th className="py-2.5 px-3">Secretaría</th>
+                <th className="py-2.5 px-3">Presupuesto</th>
+                <th className="py-2.5 px-3 text-center">Real vs Prog.</th>
+                <th className="py-2.5 px-3 text-center">Cumplimiento</th>
+                <th className="py-2.5 px-3 text-right">Acción</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
+            <tbody className="divide-y divide-slate-100 text-xs">
               {summary.critical_projects.map((proj) => (
-                <tr key={proj.project_id} className="hover:bg-rose-50/40 transition-colors">
-                  <td className="py-4 px-4 font-semibold text-slate-900">
-                    <span className="text-xs font-mono font-bold text-slate-500 block mb-0.5">
+                <tr key={proj.project_id} className="hover:bg-rose-50/50 transition-colors">
+                  <td className="py-3 px-3">
+                    <span className="font-mono font-bold text-slate-500 block text-[10px]">
                       {proj.code}
                     </span>
-                    {proj.name}
+                    <span className="font-bold text-slate-900 text-xs">{proj.name}</span>
                   </td>
-                  <td className="py-4 px-4 text-slate-600 text-xs font-medium">
+                  <td className="py-3 px-3 text-slate-600 font-medium">
                     {proj.area_name}
                   </td>
-                  <td className="py-4 px-4 font-semibold text-slate-800 text-xs">
+                  <td className="py-3 px-3 font-mono font-bold text-slate-800">
                     Bs. {proj.budget.toLocaleString()}
                   </td>
-                  <td className="py-4 px-4 text-center">
-                    <div className="text-xs font-bold text-rose-600">
-                      {proj.real_progress_pct}% <span className="text-slate-400 font-normal">/ {proj.planned_progress_pct}%</span>
-                    </div>
+                  <td className="py-3 px-3 text-center font-mono font-bold text-rose-600">
+                    {proj.real_progress_pct}% <span className="text-slate-400 font-normal">/ {proj.planned_progress_pct}%</span>
                   </td>
-                  <td className="py-4 px-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800">
+                  <td className="py-3 px-3 text-center">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-800">
                       {(proj.compliance_index * 100).toFixed(0)}%
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-right">
+                  <td className="py-3 px-3 text-right">
                     <button
                       onClick={() => onSelectProject(proj.project_id)}
-                      className="inline-flex items-center space-x-1 text-xs font-bold text-sky-700 hover:text-sky-900 bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-lg transition-all"
+                      className="inline-flex items-center space-x-1 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg transition-colors"
                     >
                       <span>Ver Ficha</span>
                       <ChevronRight className="w-3.5 h-3.5" />
@@ -367,8 +359,47 @@ export const ExecutiveDashboard: React.FC<ExecutiveDashboardProps> = ({
             </tbody>
           </table>
         </div>
+
+        {/* Vista para Celular (Tarjetas Verticales Táctiles) */}
+        <div className="sm:hidden space-y-3">
+          {summary.critical_projects.map((proj) => (
+            <div 
+              key={proj.project_id}
+              className="p-3.5 bg-rose-50/40 rounded-xl border border-rose-200 space-y-2 text-xs"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <span className="font-mono text-[10px] font-bold text-slate-500">{proj.code}</span>
+                  <h4 className="font-bold text-slate-900 text-xs mt-0.5">{proj.name}</h4>
+                  <span className="text-[11px] text-slate-500">{proj.area_name}</span>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 flex-shrink-0">
+                  {(proj.compliance_index * 100).toFixed(0)}%
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 bg-white p-2.5 rounded-lg border border-rose-100 text-[11px]">
+                <div>
+                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Presupuesto</span>
+                  <span className="font-mono font-bold text-slate-900">Bs. {proj.budget.toLocaleString()}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Real vs Prog.</span>
+                  <span className="font-mono font-bold text-rose-600">{proj.real_progress_pct}% / {proj.planned_progress_pct}%</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => onSelectProject(proj.project_id)}
+                className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-xs flex items-center justify-center space-x-1 transition-colors"
+              >
+                <span>Inspeccionar Ficha Técnica</span>
+                <ChevronRight className="w-3.5 h-3.5 text-sky-400" />
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 };
-

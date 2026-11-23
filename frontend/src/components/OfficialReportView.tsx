@@ -87,19 +87,19 @@ export const OfficialReportView: React.FC<OfficialReportViewProps> = ({ onBack }
   const { summary, projects_detailed, signers } = reportData;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-fadeIn">
+    <div className="space-y-5 sm:space-y-6 max-w-5xl mx-auto animate-fadeIn">
       {/* Barra de Acciones (Oculta al imprimir) */}
-      <div className="print:hidden bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="print:hidden bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <button
           onClick={onBack}
-          className="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition-all self-start sm:self-auto"
+          className="inline-flex items-center space-x-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-all self-start sm:self-auto"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Volver al Tablero</span>
         </button>
 
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2 text-xs font-semibold text-slate-600">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center space-x-1.5 text-xs font-semibold text-slate-600">
             <span>Período:</span>
             <select
               value={period}
@@ -115,7 +115,7 @@ export const OfficialReportView: React.FC<OfficialReportViewProps> = ({ onBack }
 
           <button
             onClick={handleExportCsv}
-            className="inline-flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-md transition-all"
+            className="inline-flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-xs transition-all"
             title="Descargar matriz en Excel para remisión al Concejo y Planificación"
           >
             <FileSpreadsheet className="w-4 h-4" />
@@ -124,16 +124,16 @@ export const OfficialReportView: React.FC<OfficialReportViewProps> = ({ onBack }
 
           <button
             onClick={handlePrint}
-            className="inline-flex items-center space-x-2 bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md transition-all"
+            className="inline-flex items-center space-x-1.5 bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg shadow-xs transition-all"
           >
             <Printer className="w-4 h-4" />
-            <span>Imprimir / Exportar a PDF</span>
+            <span>Imprimir / PDF</span>
           </button>
         </div>
       </div>
 
       {/* HOJA DE INFORME OFICIAL (FORMATO IMPRESIÓN Y LECTURA) */}
-      <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-lg text-slate-900 print:border-none print:shadow-none print:p-0 print:m-0 space-y-8 font-serif">
+      <div className="bg-white rounded-xl p-6 sm:p-10 md:p-12 border border-slate-200 shadow-xs text-slate-900 print:border-none print:shadow-none print:p-0 print:m-0 space-y-6 sm:space-y-8 font-serif">
         
         {/* Encabezado Oficial Institucional */}
         <div className="border-b-2 border-slate-900 pb-6 text-center space-y-1">

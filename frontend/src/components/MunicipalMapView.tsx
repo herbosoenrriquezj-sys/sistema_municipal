@@ -27,6 +27,7 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'green' | 'yellow' | 'red'>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeProject, setActiveProject] = useState<any | null>(null);
+  const [mobileTab, setMobileTab] = useState<'map' | 'list'>('map');
 
   // Obtener cálculo de semáforo por proyecto desde summary
   const getProjectTrafficLight = (projId: string): 'green' | 'yellow' | 'red' => {
@@ -192,6 +193,7 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
 
   const handleFlyTo = (p: any) => {
     setActiveProject(p);
+    setMobileTab('map');
     if (mapInstanceRef.current) {
       mapInstanceRef.current.flyTo([p.lat, p.lng], 16, { duration: 1.2 });
       const marker = markersRef.current[p.id];
@@ -202,69 +204,89 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* Banner Principal */}
-      <div className="bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 rounded-3xl p-6 sm:p-7 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-4 sm:space-y-6 animate-fadeIn">
+      {/* Banner Principal Institucional */}
+      <div className="bg-slate-900 rounded-xl p-4 sm:p-5 text-white border border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-sky-400 text-xs font-bold uppercase tracking-widest mb-1">
-            <Navigation className="w-4 h-4" />
-            <span>Sistema de Información Geográfica (GIS Municipal)</span>
+          <div className="flex items-center space-x-2 text-sky-400 text-[11px] font-bold uppercase tracking-wider mb-1">
+            <Navigation className="w-3.5 h-3.5" />
+            <span>Sistema de Información Geográfica (GIS Municipal) · Sucre</span>
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Mapa Satelital de Obras y Proyectos
           </h1>
-          <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
+          <p className="text-slate-300 text-xs sm:text-sm mt-0.5 max-w-2xl">
             Georreferenciación de proyectos de inversión pública en tiempo real con monitoreo visual de semáforos por distrito.
           </p>
         </div>
 
         {/* Resumen de pines */}
-        <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/10 text-xs">
-          <div className="flex items-center space-x-1.5 px-2">
+        <div className="flex items-center space-x-2.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs self-start md:self-auto">
+          <div className="flex items-center space-x-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-            <span>En Ruta</span>
+            <span className="text-slate-200 text-[11px] font-semibold">En Ruta</span>
           </div>
-          <div className="flex items-center space-x-1.5 px-2">
+          <div className="flex items-center space-x-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-            <span>En Riesgo</span>
+            <span className="text-slate-200 text-[11px] font-semibold">En Riesgo</span>
           </div>
-          <div className="flex items-center space-x-1.5 px-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
-            <span>Crítico</span>
+          <div className="flex items-center space-x-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+            <span className="text-slate-200 text-[11px] font-semibold">Crítico</span>
           </div>
         </div>
       </div>
 
+      {/* Switcher de Vista en Móvil y Tablet (< lg) */}
+      <div className="lg:hidden flex bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-bold">
+        <button
+          onClick={() => setMobileTab('map')}
+          className={`flex-1 py-2 rounded-md transition-all flex items-center justify-center space-x-1.5 ${
+            mobileTab === 'map' ? 'bg-white text-sky-800 shadow-xs' : 'text-slate-600'
+          }`}
+        >
+          <span>🗺️ Ver Mapa Satelital</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('list')}
+          className={`flex-1 py-2 rounded-md transition-all flex items-center justify-center space-x-1.5 ${
+            mobileTab === 'list' ? 'bg-white text-sky-800 shadow-xs' : 'text-slate-600'
+          }`}
+        >
+          <span>📋 Obras ({filteredProjects.length})</span>
+        </button>
+      </div>
+
       {/* Grid: Lista Lateral + Mapa */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[680px]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 h-[560px] sm:h-[640px]">
         {/* Panel Lateral de Obras */}
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col h-full space-y-4">
+        <div className={`${mobileTab === 'list' ? 'flex' : 'hidden'} lg:flex bg-white rounded-xl p-4 border border-slate-200 shadow-xs flex-col h-full space-y-3`}>
           <div>
-            <h3 className="font-bold text-sm text-slate-900">
+            <h3 className="font-bold text-xs sm:text-sm text-slate-900">
               Obras Georreferenciadas ({filteredProjects.length})
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-[11px] text-slate-500 mt-0.5">
               Haga clic sobre una obra para centrar el mapa.
             </p>
           </div>
 
           {/* Buscador */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               placeholder="Buscar por nombre, código o distrito..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-sky-500"
+              className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-1 focus:ring-sky-500"
             />
           </div>
 
           {/* Filtro por Semáforo */}
-          <div className="flex space-x-1 bg-slate-100 p-1 rounded-xl text-xs">
+          <div className="flex space-x-1 bg-slate-100 p-1 rounded-lg text-xs">
             <button
               onClick={() => setSelectedFilter('all')}
-              className={`flex-1 py-1 rounded-lg font-bold transition-all ${
+              className={`flex-1 py-1 rounded font-bold transition-all ${
                 selectedFilter === 'all' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600'
               }`}
             >
@@ -272,7 +294,7 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFilter('green')}
-              className={`flex-1 py-1 rounded-lg font-bold transition-all ${
+              className={`flex-1 py-1 rounded font-bold transition-all ${
                 selectedFilter === 'green' ? 'bg-emerald-500 text-white shadow-xs' : 'text-slate-600'
               }`}
             >
@@ -280,7 +302,7 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFilter('yellow')}
-              className={`flex-1 py-1 rounded-lg font-bold transition-all ${
+              className={`flex-1 py-1 rounded font-bold transition-all ${
                 selectedFilter === 'yellow' ? 'bg-amber-500 text-white shadow-xs' : 'text-slate-600'
               }`}
             >
@@ -288,7 +310,7 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
             </button>
             <button
               onClick={() => setSelectedFilter('red')}
-              className={`flex-1 py-1 rounded-lg font-bold transition-all ${
+              className={`flex-1 py-1 rounded font-bold transition-all ${
                 selectedFilter === 'red' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600'
               }`}
             >
@@ -297,17 +319,17 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
           </div>
 
           {/* Lista Scrollable */}
-          <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+          <div className="flex-1 overflow-y-auto space-y-2 pr-1">
             {filteredProjects.map((p) => {
               const isSelected = activeProject?.id === p.id;
               return (
                 <div
                   key={p.id}
                   onClick={() => handleFlyTo(p)}
-                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer text-xs space-y-2 ${
+                  className={`p-3 rounded-lg border transition-all cursor-pointer text-xs space-y-1.5 ${
                     isSelected
-                      ? 'border-sky-500 bg-sky-50/70 shadow-sm'
-                      : 'border-slate-200 hover:border-slate-300 bg-slate-50/50 hover:bg-white'
+                      ? 'border-sky-500 bg-sky-50/70 shadow-xs'
+                      : 'border-slate-200 hover:border-slate-300 bg-slate-50/40 hover:bg-white'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -319,7 +341,7 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
                         {p.name}
                       </h4>
                     </div>
-                    <span className={`w-3 h-3 rounded-full flex-shrink-0 mt-1 ${
+                    <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1 ${
                       p.trafficLight === 'green' ? 'bg-emerald-500' :
                       p.trafficLight === 'yellow' ? 'bg-amber-500' : 'bg-rose-600'
                     }`}></span>
@@ -330,7 +352,7 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
                     <span className="truncate">{p.location_name || 'Ubicación central'}</span>
                   </p>
 
-                  <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-slate-200/60 font-semibold">
+                  <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-slate-200 font-semibold">
                     <span className="text-slate-600">Avance Real:</span>
                     <span className="text-slate-900 font-extrabold">{p.progress.real}%</span>
                   </div>
@@ -341,40 +363,47 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
         </div>
 
         {/* Mapa Interactivo con Capas Satelitales de Google */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden relative h-full">
+        <div className={`${mobileTab === 'map' ? 'block' : 'hidden'} lg:block lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden relative h-full`}>
           <div ref={mapContainerRef} className="w-full h-full z-0"></div>
 
           {/* Selector flotante de Capas Google Maps */}
-          <div className="absolute top-4 right-4 z-20 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-lg border border-slate-200 flex flex-wrap items-center gap-1 text-xs">
+          <div className="absolute top-3 right-3 z-20 bg-white/95 backdrop-blur-xs p-1 rounded-lg shadow-md border border-slate-200 flex items-center gap-1 text-xs">
             <button
               onClick={() => setMapLayerType('google-hybrid')}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1 ${
+              className={`px-2 sm:px-2.5 py-1 rounded font-bold transition-all flex items-center space-x-1 ${
                 mapLayerType === 'google-hybrid' ? 'bg-sky-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
               }`}
+              title="Google Satélite Híbrido HD"
             >
-              <span>🛰️ Google Satélite</span>
+              <span>🛰️</span>
+              <span className="hidden sm:inline">Satélite</span>
             </button>
             <button
               onClick={() => setMapLayerType('google-streets')}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1 ${
+              className={`px-2 sm:px-2.5 py-1 rounded font-bold transition-all flex items-center space-x-1 ${
                 mapLayerType === 'google-streets' ? 'bg-sky-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
               }`}
+              title="Google Maps Calles"
             >
-              <span>🗺️ Calles</span>
+              <span>🗺️</span>
+              <span className="hidden sm:inline">Calles</span>
             </button>
             <button
               onClick={() => setMapLayerType('google-terrain')}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1 ${
+              className={`px-2 sm:px-2.5 py-1 rounded font-bold transition-all flex items-center space-x-1 ${
                 mapLayerType === 'google-terrain' ? 'bg-sky-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
               }`}
+              title="Google Maps Topográfico"
             >
-              <span>⛰️ Relieve</span>
+              <span>⛰️</span>
+              <span className="hidden sm:inline">Relieve</span>
             </button>
             <button
               onClick={() => setMapLayerType('osm')}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center space-x-1 ${
+              className={`px-2 sm:px-2.5 py-1 rounded font-bold transition-all flex items-center space-x-1 ${
                 mapLayerType === 'osm' ? 'bg-sky-700 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
               }`}
+              title="OpenStreetMap"
             >
               <span>OSM</span>
             </button>
@@ -382,28 +411,28 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
 
           {/* Tarjeta Flotante al Seleccionar Obra */}
           {activeProject && (
-            <div className="absolute bottom-6 left-6 right-6 sm:right-auto sm:max-w-md bg-white/95 backdrop-blur-md rounded-2xl p-4 border border-slate-200 shadow-xl z-20 space-y-3 animate-fadeIn">
+            <div className="absolute bottom-3 left-3 right-3 sm:right-auto sm:max-w-md bg-white/95 backdrop-blur-xs rounded-xl p-3.5 sm:p-4 border border-slate-200 shadow-lg z-20 space-y-2.5 animate-fadeIn">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                  <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
                     {activeProject.code}
                   </span>
-                  <h4 className="font-bold text-sm text-slate-900 mt-1">
+                  <h4 className="font-bold text-xs sm:text-sm text-slate-900 mt-1">
                     {activeProject.name}
                   </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-[11px] text-slate-500 mt-0.5">
                     📍 {activeProject.location_name}
                   </p>
                 </div>
                 <button
                   onClick={() => setActiveProject(null)}
-                  className="text-slate-400 hover:text-slate-600 text-xs font-bold"
+                  className="text-slate-400 hover:text-slate-600 text-xs font-bold p-1"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-200 font-semibold">
+              <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2 rounded-lg border border-slate-200 font-semibold">
                 <div>
                   <span className="text-slate-500 block text-[10px]">Presupuesto</span>
                   <span className="text-slate-900 font-bold">Bs. {activeProject.budget_allocated?.toLocaleString()}</span>
@@ -425,7 +454,7 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
                   href={`https://www.google.com/maps/search/?api=1&query=${activeProject.lat},${activeProject.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center space-x-1 border border-slate-300 transition-all"
+                  className="flex-1 py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center space-x-1 border border-slate-300 transition-all"
                 >
                   <Navigation className="w-3.5 h-3.5 text-sky-600" />
                   <span>Google Maps GPS</span>
@@ -434,7 +463,7 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
                   href={`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${activeProject.lat},${activeProject.lng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-1.5 px-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center space-x-1 border border-slate-300 transition-all"
+                  className="flex-1 py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center space-x-1 border border-slate-300 transition-all"
                 >
                   <Camera className="w-3.5 h-3.5 text-indigo-600" />
                   <span>Street View 360°</span>
@@ -443,7 +472,7 @@ export const MunicipalMapView: React.FC<MunicipalMapViewProps> = ({
 
               <button
                 onClick={() => onSelectProject(activeProject.id)}
-                className="w-full py-2 rounded-xl bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs shadow-sm flex items-center justify-center space-x-1.5 transition-all"
+                className="w-full py-2 rounded-lg bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs shadow-xs flex items-center justify-center space-x-1.5 transition-all"
               >
                 <span>Ver Ficha Técnica y Desglose EDT</span>
                 <ExternalLink className="w-3.5 h-3.5" />

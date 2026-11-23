@@ -118,28 +118,28 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 animate-fadeIn">
-      {/* Banner Principal Diapositiva 11 */}
-      <div className="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-3xl p-6 sm:p-7 text-white shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="max-w-5xl mx-auto space-y-5 sm:space-y-6 animate-fadeIn">
+      {/* Banner Principal Institucional */}
+      <div className="bg-slate-900 rounded-xl p-4 sm:p-5 text-white border border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-emerald-300 text-xs font-bold uppercase tracking-widest mb-1">
-            <Camera className="w-4 h-4" />
-            <span>Módulo de Campo · Registro Móvil y Fiscalización (Diapositiva 11)</span>
+          <div className="flex items-center space-x-2 text-emerald-400 text-[11px] font-bold uppercase tracking-wider mb-1">
+            <Camera className="w-3.5 h-3.5" />
+            <span>Módulo de Campo · Registro Móvil y Fiscalización con GPS</span>
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
             Fiscalización y Captura de Avance con Respaldo
           </h1>
-          <p className="text-emerald-100 text-xs sm:text-sm mt-1 max-w-2xl">
+          <p className="text-slate-300 text-xs sm:text-sm mt-0.5 max-w-2xl">
             El avance se registra en la obra con fotos geolocalizadas (GPS) y pasa por validación formal del fiscalizador antes de sumarse a los indicadores.
           </p>
         </div>
 
         {/* Pestañas de Modo */}
-        <div className="flex bg-black/20 p-1 rounded-2xl border border-white/10 self-start md:self-auto">
+        <div className="flex bg-slate-800 p-1 rounded-lg border border-slate-700 self-start md:self-auto text-xs font-bold">
           <button
             onClick={() => setActiveSubTab('submit')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeSubTab === 'submit' ? 'bg-white text-emerald-950 shadow-sm' : 'text-emerald-100 hover:text-white'
+            className={`px-3.5 py-1.5 rounded-md transition-all ${
+              activeSubTab === 'submit' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-300 hover:text-white'
             }`}
           >
             Registrar Avance
@@ -149,8 +149,8 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
               setActiveSubTab('review');
               loadPending();
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
-              activeSubTab === 'review' ? 'bg-white text-emerald-950 shadow-sm' : 'text-emerald-100 hover:text-white'
+            className={`px-3.5 py-1.5 rounded-md transition-all flex items-center space-x-1.5 ${
+              activeSubTab === 'review' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-300 hover:text-white'
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
@@ -166,7 +166,7 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
 
       {message && (
         <div
-          className={`p-4 rounded-2xl text-sm font-semibold flex items-center space-x-2 ${
+          className={`p-3.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center space-x-2 shadow-xs ${
             message.type === 'success'
               ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
               : 'bg-rose-50 border border-rose-200 text-rose-800'
@@ -183,18 +183,18 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
 
       {/* MODO 1: REGISTRO DE AVANCE (RESIDENTE) */}
       {activeSubTab === 'submit' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          <div className="md:col-span-2 bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-4">
             <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-              <h2 className="font-bold text-base text-slate-900">
+              <h2 className="font-bold text-sm sm:text-base text-slate-900">
                 Nuevo Reporte Periódico de Avance
               </h2>
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
                 Paso 4: Reporte
               </span>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
+            <form onSubmit={handleSubmit} className="space-y-3.5 text-xs sm:text-sm">
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Proyecto / Obra</label>
                 <select
@@ -203,7 +203,7 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
                     setSelectedProjectId(e.target.value);
                     setSelectedActivityId('');
                   }}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-slate-800 font-semibold focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 text-slate-800 font-semibold focus:ring-1 focus:ring-sky-500"
                 >
                   {projects.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -218,7 +218,7 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
                 <select
                   value={selectedActivityId}
                   onChange={(e) => setSelectedActivityId(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-slate-800 font-semibold focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 text-slate-800 font-semibold focus:ring-1 focus:ring-sky-500"
                   required
                 >
                   <option value="">-- Seleccione la actividad ejecutada --</option>
@@ -240,19 +240,19 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
                   min="0.1"
                   value={executedQuantity}
                   onChange={(e) => setExecutedQuantity(parseFloat(e.target.value) || 0)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-xl py-2 px-3 text-slate-900 font-bold focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-lg py-2 px-3 text-slate-900 font-bold focus:ring-1 focus:ring-sky-500"
                   required
                 />
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
-                <span className="font-bold text-xs uppercase tracking-wider text-slate-600 flex items-center">
-                  <Camera className="w-4 h-4 mr-1.5 text-emerald-600" />
+              <div className="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-2.5">
+                <span className="font-bold text-[11px] uppercase tracking-wider text-slate-600 flex items-center">
+                  <Camera className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
                   Fotografía de Respaldo con Geolocalización
                 </span>
 
                 <div>
-                  <label className="block text-slate-600 text-xs font-semibold mb-1">
+                  <label className="block text-slate-600 text-[11px] font-semibold mb-1">
                     Descripción técnica de la inspección
                   </label>
                   <input
@@ -263,7 +263,7 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
                   />
                 </div>
 
-                <div className="flex items-center space-x-2 text-xs text-slate-500 bg-white p-2.5 rounded-xl border border-slate-200">
+                <div className="flex items-center space-x-2 text-xs text-slate-500 bg-white p-2.5 rounded-lg border border-slate-200">
                   <MapPin className="w-4 h-4 text-rose-500 flex-shrink-0" />
                   <span>GPS: <strong>-19.0280, -65.2630</strong> (Distrito 2, Sucre - Chuquisaca)</span>
                 </div>
@@ -272,7 +272,7 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md transition-all flex items-center justify-center space-x-2"
+                className="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center justify-center space-x-2"
               >
                 <Send className="w-4 h-4" />
                 <span>{submitting ? 'Enviando avance...' : 'Registrar Avance y Enviar a Fiscal'}</span>
@@ -281,12 +281,12 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
           </div>
 
           <div className="space-y-4">
-            <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm space-y-3">
-              <h3 className="font-bold text-sm text-slate-900 flex items-center">
+            <div className="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 shadow-xs space-y-3">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900 flex items-center">
                 <Image className="w-4 h-4 mr-1.5 text-sky-600" />
                 Evidencia en Terreno
               </h3>
-              <div className="rounded-2xl overflow-hidden border border-slate-200 aspect-video relative group">
+              <div className="rounded-lg overflow-hidden border border-slate-200 aspect-video relative group">
                 <img
                   src={photoUrl}
                   alt="Inspección de obra"
@@ -299,12 +299,12 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
               </div>
             </div>
 
-            <div className="bg-amber-50 rounded-3xl p-5 border border-amber-200 text-xs text-amber-900 space-y-2">
-              <span className="font-bold uppercase tracking-wider text-amber-800 flex items-center">
-                <ShieldCheck className="w-4 h-4 mr-1 text-amber-600" />
+            <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 text-xs text-amber-900 space-y-1.5">
+              <span className="font-bold uppercase tracking-wider text-amber-800 flex items-center text-[11px]">
+                <ShieldCheck className="w-3.5 h-3.5 mr-1 text-amber-600" />
                 Regla de Auditoría Municipal
               </span>
-              <p>
+              <p className="leading-relaxed">
                 El avance físico <strong>NO se suma al porcentaje del proyecto</strong> hasta que el Fiscalizador o Supervisor de Obra apruebe el reporte en el sistema.
               </p>
             </div>
@@ -314,35 +314,35 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
 
       {/* MODO 2: BANDEJA DE FISCALIZACIÓN (SUPERVISOR) */}
       {activeSubTab === 'review' && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 gap-2">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900">
                 Bandeja de Validación de Reportes de Campo
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Revise las mediciones y fotografías antes de autorizar su consolidación en el Tablero del Alcalde.
               </p>
             </div>
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-800">
+            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded bg-sky-100 text-sky-800 border border-sky-200 self-start sm:self-auto">
               Paso 5: Validación
             </span>
           </div>
 
           {pendingReports.length === 0 ? (
-            <div className="text-center py-12 text-slate-500 space-y-2">
-              <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
-              <h3 className="font-bold text-base text-slate-800">No hay reportes pendientes</h3>
+            <div className="text-center py-10 text-slate-500 space-y-2">
+              <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
+              <h3 className="font-bold text-sm sm:text-base text-slate-800">No hay reportes pendientes</h3>
               <p className="text-xs text-slate-400">
                 Todas las mediciones de obra han sido fiscalizadas y aprobadas.
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3.5">
               {pendingReports.map((report) => (
                 <div
                   key={report.id}
-                  className="p-5 rounded-2xl border border-slate-200 hover:border-slate-300 bg-slate-50/50 space-y-4"
+                  className="p-4 sm:p-5 rounded-lg border border-slate-200 hover:border-slate-300 bg-slate-50/40 space-y-3"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                     <div>
@@ -354,7 +354,7 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
                           Estado: <span className="text-amber-600 uppercase font-semibold">Pendiente de Aprobación</span>
                         </span>
                       </div>
-                      <h4 className="font-bold text-base text-slate-900 mt-1">
+                      <h4 className="font-bold text-sm sm:text-base text-slate-900 mt-1">
                         Cantidad Ejecutada: {report.quantity_executed} unidades
                       </h4>
                       <p className="text-xs text-slate-500 mt-0.5">
@@ -364,14 +364,14 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
 
                     {/* Evidencias fotográficas asociadas */}
                     {report.evidences && report.evidences.length > 0 && (
-                      <div className="flex items-center space-x-3 bg-white p-2 rounded-xl border border-slate-200">
+                      <div className="flex items-center space-x-2.5 bg-white p-2 rounded-lg border border-slate-200 self-start sm:self-auto">
                         <img
                           src={report.evidences[0].file_url}
                           alt="Evidencia"
-                          className="w-16 h-12 rounded-lg object-cover"
+                          className="w-14 h-11 rounded object-cover"
                         />
                         <div className="text-xs">
-                          <p className="font-semibold text-slate-800 truncate max-w-[150px]">
+                          <p className="font-semibold text-slate-800 truncate max-w-[140px]">
                             {report.evidences[0].description || 'Foto de obra'}
                           </p>
                           <span className="text-[10px] text-slate-400 flex items-center">
@@ -384,7 +384,7 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
                   </div>
 
                   {/* Campo de Comentarios del Fiscal */}
-                  <div className="pt-2 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="pt-2 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                     <input
                       type="text"
                       placeholder="Observaciones técnicas de inspección (opcional)..."
@@ -392,21 +392,21 @@ export const FieldReportingView: React.FC<FieldReportingViewProps> = ({
                       onChange={(e) =>
                         setSupervisorComments({ ...supervisorComments, [report.id]: e.target.value })
                       }
-                      className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs flex-1"
+                      className="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs flex-1"
                     />
 
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => handleValidate(report.id, 'rejected')}
-                        className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 font-bold text-xs transition-all"
+                        className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-rose-300 text-rose-700 bg-rose-50 hover:bg-rose-100 font-bold text-xs transition-all"
                       >
                         <X className="w-3.5 h-3.5" />
-                        <span>Rechazar / Observar</span>
+                        <span>Rechazar</span>
                       </button>
 
                       <button
                         onClick={() => handleValidate(report.id, 'approved')}
-                        className="inline-flex items-center space-x-1 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all"
+                        className="inline-flex items-center space-x-1 px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all"
                       >
                         <Check className="w-3.5 h-3.5" />
                         <span>Aprobar Avance</span>

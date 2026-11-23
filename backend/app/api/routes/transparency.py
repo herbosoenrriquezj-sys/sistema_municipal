@@ -184,3 +184,4 @@ def respond_citizen_inquiry(
         "success": True,
         "message": "Respuesta oficial registrada y publicada para la junta vecinal."
     }
+
